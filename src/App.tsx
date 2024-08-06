@@ -1,15 +1,6 @@
-import {
-	Button,
-	Field,
-	Fieldset,
-	Input,
-	Label,
-	Legend,
-	Select,
-	Transition,
-} from "@headlessui/react";
+import { Button, Select } from "@headlessui/react";
 import { Gantt, type Task } from "gantt-task-react";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "gantt-task-react/dist/index.css";
 import {
 	type CondensedProjectSchema,
@@ -23,10 +14,10 @@ import { parseFrontMatter } from "./frontMatterParser";
 
 const App = () => {
 	const [gitlabUrl, setGitlabUrl] = useState(
-		localStorage.getItem("GITLAB_API_BASE_URL") || "",
+		localStorage.getItem("GITLAB_DOMAIN") || "",
 	);
 	const [token, setToken] = useState(
-		localStorage.getItem("GITLAB_API_TOKEN") || "",
+		localStorage.getItem("GITLAB_ACCESS_TOKEN") || "",
 	);
 
 	const api = new Gitlab({
@@ -62,28 +53,29 @@ const App = () => {
 		}
 	};
 
-	const handleSaveSettings = () => {
-		localStorage.setItem("GITLAB_API_BASE_URL", gitlabUrl);
-		localStorage.setItem("GITLAB_API_TOKEN", token);
-		console.log("Settings saved:", { gitlabUrl, token });
-		window.location.reload();
-	};
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		(async () => {
-			if (gitlabUrl && token) {
-				try {
-					// const response = await fetchProjects();
-					// setProjects(response);
-					const response = await fetchGroups();
-					setGroups(response);
-				} catch (error) {
-					console.error("Error fetching projects:", error);
-				}
-			}
-		})();
-	}, [gitlabUrl, token]);
+		const gitlabDomain = localStorage.getItem("GITLAB_DOMAIN");
+		const gitlabAccessToken = localStorage.getItem("GITLAB_ACCESS_TOKEN");
+
+		if (!gitlabDomain || !gitlabAccessToken) {
+			setIsDialogOpen(true);
+		}
+	}, []);
+	// // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// useEffect(() => {
+	// 	(async () => {
+	// 		if (gitlabUrl && token) {
+	// 			try {
+	// 				// const response = await fetchProjects();
+	// 				// setProjects(response);
+	// 				const response = await fetchGroups();
+	// 				setGroups(response);
+	// 			} catch (error) {
+	// 				console.error("Error fetching projects:", error);
+	// 			}
+	// 		}
+	// 	})();
+	// }, [gitlabUrl, token]);
 
 	interface Frontmatter {
 		start: string;
@@ -170,30 +162,7 @@ const App = () => {
 			>
 				⚙️
 			</Button>
-			<SettingsDialog isOpen={isDialogOpen} onClose={closeDialog} />
-			<Fieldset className="space-y-8">
-				<Legend className="text-lg font-bold">Host Settings</Legend>
-				<Field>
-					<Label className="block text-xs font-medium text-gray-700">
-						GitLab URL
-					</Label>
-					<Input
-						className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
-						name="gitlab-url"
-						value={gitlabUrl}
-						onChange={(e) => setGitlabUrl(e.target.value)}
-					/>
-				</Field>
-				<Field>
-					<Label>Access Token</Label>
-					<Input
-						name="access-token"
-						value={token}
-						onChange={(e) => setToken(e.target.value)}
-					/>
-				</Field>
-			</Fieldset>
-			<Button onClick={handleSaveSettings}>保存</Button>
+			<SettingsDialog open={isDialogOpen} onClose={closeDialog} />
 			<Select
 				value={selectedGroupId}
 				onChange={(e) => handleGroupChange(e.target.value)}

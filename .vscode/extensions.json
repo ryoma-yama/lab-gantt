@@ -1,5 +1,7 @@
 {
-    "recommendations": [
-        "biomejs.biome"
-    ]
+	"recommendations": [
+		"biomejs.biome",
+		"dsznajder.es7-react-js-snippets",
+		"bradlc.vscode-tailwindcss"
+	]
 }
