@@ -1,0 +1,36 @@
+name: 実装案
+description: 実装案のテンプレート
+title: "実装："
+labels: ["enhancement"]
+assignees:
+  - octocat
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: どうしたいか
+      placeholder: 何を、どのようにしたいか
+      value: "- "
+    validations:
+      required: true
+  - type: textarea
+    id: how
+    attributes:
+      label: どうするか
+      placeholder: 実現方法を細分化して箇条書きにする
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想定される問題
+      placeholder: 実現方法を実行したときに考えられる問題を箇条書きにする
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: textarea
+    id: memo
+    attributes:
+      label: その他
+      placeholder: 他に何かあれば
