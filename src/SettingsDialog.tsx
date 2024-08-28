@@ -10,18 +10,29 @@ import {
 } from "@headlessui/react";
 import { useEffect, useState } from "react";
 
+type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
+
 interface SettingsDialogProps {
 	open: boolean;
 	onClose: () => void;
+	// onSettingsSaved: () => void;
+	onSettingsSaved: SetState<InstanceType<typeof Gitlab<false>> | null>;
+	gitlabDomain: string;
+	setGitLabDomain: SetState<string>;
+	gitlabAccessToken: string;
+	setGitLabAccessToken: SetState<string>;
+	gitlabInstance: InstanceType<typeof Gitlab> | null;
 }
 
-const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
-	const [gitlabDomain, setGitlabDomain] = useState(
-		localStorage.getItem("GITLAB_DOMAIN") || "",
-	);
-	const [gitlabAccessToken, setGitLabAccessToken] = useState(
-		localStorage.getItem("GITLAB_ACCESS_TOKEN") || "",
-	);
+const SettingsDialog: React.FC<SettingsDialogProps> = ({
+	open,
+	onClose,
+	onSettingsSaved,
+	gitlabDomain,
+	setGitLabDomain,
+	gitlabAccessToken,
+	setGitLabAccessToken,
+}) => {
 	const [invalid, setInvalid] = useState(true);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -48,6 +59,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
 
 			localStorage.setItem("GITLAB_DOMAIN", gitlabDomain);
 			localStorage.setItem("GITLAB_ACCESS_TOKEN", gitlabAccessToken);
+			onSettingsSaved(api);
 			onClose();
 		} catch (error) {
 			setErrorMessage(
@@ -88,7 +100,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose }) => {
 								type="text"
 								name="gitlabDomain"
 								value={gitlabDomain}
-								onChange={(e) => setGitlabDomain(e.target.value)}
+								onChange={(e) => setGitLabDomain(e.target.value)}
 								className={defaultInput}
 								placeholder="https://gitlab.com"
 								required={true}
