@@ -1,7 +1,8 @@
 import { Button, Select } from "@headlessui/react";
-import { type DisplayOption, Gantt, type Task } from "gantt-task-react";
+import { type DisplayOption, Gantt, type Task } from "neo-gantt-task-react";
 import { useCallback, useEffect, useState } from "react";
-import "gantt-task-react/dist/index.css";
+import "neo-gantt-task-react/style.css";
+
 import {
 	type CondensedProjectSchema,
 	Gitlab,
@@ -54,13 +55,6 @@ const App = () => {
 	const [groups, setGroups] = useState<GroupSchema[]>([]);
 	const [selectedGroupId, setSelectedGroupId] = useState("");
 
-	const handleGroupChange = (groupId: string) => {
-		setSelectedGroupId(groupId);
-		loadGroupsProject(groupId);
-	};
-
-	const [projects, setProjects] = useState<CondensedProjectSchema[]>([]);
-	const [selectedProjectId, setSelectedProjectId] = useState("");
 	const loadGroupsProject = async (groupId: string) => {
 		try {
 			if (!gitlabClient) return;
@@ -69,6 +63,31 @@ const App = () => {
 		} catch (error) {
 			console.error("Error loading projects:", error);
 		}
+	};
+
+	const handleGroupChange = (groupId: string) => {
+		setSelectedGroupId(groupId);
+		loadGroupsProject(groupId);
+	};
+
+	const [projects, setProjects] = useState<CondensedProjectSchema[]>([]);
+	const [selectedProjectId, setSelectedProjectId] = useState("");
+
+	const loadProjectsIssues = async (projectId: string) => {
+		try {
+			if (!gitlabClient) return;
+			const response = await gitlabClient.Issues.all({ projectId });
+			const tasks = response.map(parseIssues);
+			console.warn(tasks);
+			setTasks(tasks);
+		} catch (error) {
+			console.error("Error loading issues:", error);
+		}
+	};
+
+	const handleProjectChange = (projectId: string) => {
+		setSelectedProjectId(projectId);
+		loadProjectsIssues(projectId);
 	};
 
 	const fetchIssues = async (projectId: string) => {
@@ -134,7 +153,9 @@ const App = () => {
 		}
 
 		return {
-			start: start || endDate,
+			// start: start || endDate,
+			// end: endDate,
+			start: endDate,
 			end: endDate,
 			name: response.title,
 			id: `${response.iid}`,
@@ -153,10 +174,9 @@ const App = () => {
 		setIsDialogOpen(false);
 	};
 
-	const DisplayOption: DisplayOption = {
-		locale: "ja_JP",
+	const getUsersLanguage = () => {
+		return navigator.language;
 	};
-	// navigator.language で取得するのが吉. Fromがそのままの点については別途対応する
 
 	return (
 		<>
@@ -204,7 +224,8 @@ const App = () => {
 			</Select>
 			<Select
 				value={selectedProjectId}
-				onChange={(e) => setSelectedProjectId(e.target.value)}
+				// onChange={(e) => setSelectedProjectId(e.target.value)}
+				onChange={(e) => handleProjectChange(e.target.value)}
 			>
 				<option value="" disabled>
 					プロジェクトを選択
@@ -221,15 +242,13 @@ const App = () => {
 					</option>
 				)}
 			</Select>
-			<Button onClick={handleFetchIssues}>取得</Button>
-			{tasks.length > 0 && (
+			{
 				<Gantt
-					{...{ DisplayOption }}
 					tasks={tasks}
-					onClick={(e) => console.warn(e.id)}
-					locale="ja"
+					onClick={(e) => console.warn(e)}
+					locale={getUsersLanguage()}
 				/>
-			)}
+			}
 		</>
 	);
 };
