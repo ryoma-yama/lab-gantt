@@ -1,16 +1,8 @@
-import {
-	Button,
-	Field,
-	Fieldset,
-	Input,
-	Label,
-	Legend,
-	Select,
-	Transition,
-} from "@headlessui/react";
-import { Gantt, type Task } from "gantt-task-react";
-import { Fragment, useEffect, useState } from "react";
-import "gantt-task-react/dist/index.css";
+import { Button, Select } from "@headlessui/react";
+import { type DisplayOption, Gantt, type Task } from "neo-gantt-task-react";
+import { useCallback, useEffect, useState } from "react";
+import "neo-gantt-task-react/style.css";
+
 import {
 	type CondensedProjectSchema,
 	Gitlab,
@@ -22,87 +14,86 @@ import SettingsDialog from "./SettingsDialog";
 import { parseFrontMatter } from "./frontMatterParser";
 
 const App = () => {
-	const [gitlabUrl, setGitlabUrl] = useState(
-		localStorage.getItem("GITLAB_API_BASE_URL") || "",
+	const [gitlabDomain, setGitLabDomain] = useState(
+		localStorage.getItem("GITLAB_DOMAIN") || "",
 	);
-	const [token, setToken] = useState(
-		localStorage.getItem("GITLAB_API_TOKEN") || "",
+	const [gitlabAccessToken, setGitLabAccessToken] = useState(
+		localStorage.getItem("GITLAB_ACCESS_TOKEN") || "",
 	);
+	type GitLabClinet = InstanceType<typeof Gitlab<false>>;
+	const [gitlabClient, setGitLabClient] = useState<GitLabClinet | null>(null);
 
-	const api = new Gitlab({
-		host: gitlabUrl,
-		token: token,
-	});
+	const initializeGitlabClient = useCallback(() => {
+		if (gitlabDomain && gitlabAccessToken) {
+			return new Gitlab({
+				host: gitlabDomain,
+				token: gitlabAccessToken,
+			});
+		}
+		return null;
+	}, [gitlabDomain, gitlabAccessToken]);
+
+	useEffect(() => {
+		const loadGroups = async (client: GitLabClinet) => {
+			try {
+				const groups = await client.Groups.all();
+				setGroups(groups);
+			} catch (error) {
+				console.error("Error fetching groups:", error);
+			}
+		};
+
+		const client = initializeGitlabClient();
+		if (client) {
+			setGitLabClient(client);
+			loadGroups(client);
+		} else {
+			setIsDialogOpen(true);
+		}
+	}, [initializeGitlabClient]);
 
 	const [groups, setGroups] = useState<GroupSchema[]>([]);
 	const [selectedGroupId, setSelectedGroupId] = useState("");
-	const fetchGroups = async () => {
+
+	const loadGroupsProject = async (groupId: string) => {
 		try {
-			const response = await api.Groups.all();
-			return response;
+			if (!gitlabClient) return;
+			const response = await gitlabClient.Groups.allProjects(groupId);
+			setProjects(response);
 		} catch (error) {
-			console.error("Error fetching groups:", error);
-			throw error;
+			console.error("Error loading projects:", error);
 		}
 	};
 
 	const handleGroupChange = (groupId: string) => {
 		setSelectedGroupId(groupId);
-		fetchGroupsProject(groupId);
+		loadGroupsProject(groupId);
 	};
 
 	const [projects, setProjects] = useState<CondensedProjectSchema[]>([]);
 	const [selectedProjectId, setSelectedProjectId] = useState("");
-	const fetchGroupsProject = async (groupId: string) => {
+
+	const loadProjectsIssues = async (projectId: string) => {
 		try {
-			const response = await api.Groups.allProjects(groupId);
-			setProjects(response);
+			if (!gitlabClient) return;
+			const response = await gitlabClient.Issues.all({ projectId });
+			const tasks = response.map(parseIssues);
+			console.warn(tasks);
+			setTasks(tasks);
 		} catch (error) {
-			console.error("Error fetching projects:", error);
+			console.error("Error loading issues:", error);
 		}
 	};
 
-	const handleSaveSettings = () => {
-		localStorage.setItem("GITLAB_API_BASE_URL", gitlabUrl);
-		localStorage.setItem("GITLAB_API_TOKEN", token);
-		console.log("Settings saved:", { gitlabUrl, token });
-		window.location.reload();
-	};
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		(async () => {
-			if (gitlabUrl && token) {
-				try {
-					// const response = await fetchProjects();
-					// setProjects(response);
-					const response = await fetchGroups();
-					setGroups(response);
-				} catch (error) {
-					console.error("Error fetching projects:", error);
-				}
-			}
-		})();
-	}, [gitlabUrl, token]);
-
-	interface Frontmatter {
-		start: string;
-		progress: number;
-	}
-
-	const extractFrontmatter = (markdown: string) => {
-		const result = parseFrontMatter(markdown);
-		if (result.data) {
-			const { data } = result;
-			console.warn("Extracted data:", data);
-			return data as Frontmatter;
-		}
-		return null;
+	const handleProjectChange = (projectId: string) => {
+		setSelectedProjectId(projectId);
+		loadProjectsIssues(projectId);
 	};
 
 	const fetchIssues = async (projectId: string) => {
 		try {
-			const response = await api.Issues.all({ projectId });
+			if (!gitlabClient) return [];
+			const response = await gitlabClient.Issues.all({ projectId });
 			return response;
 		} catch (error) {
 			console.error("Error fetching issues:", error);
@@ -113,12 +104,32 @@ const App = () => {
 	const handleFetchIssues = async () => {
 		try {
 			const data = await fetchIssues(selectedProjectId);
+			// if (data.length === 0) {
+			// 	// TODO: Add Message.
+			// 	console.warn("No Issues.");
+			// 	return;
+			// }
 			const tasks = data.map(parseIssues);
 			console.warn(tasks);
 			setTasks(tasks);
 		} catch (error) {
-			console.error(error);
+			console.error("Error loading issues:", error);
 		}
+	};
+
+	interface Frontmatter {
+		start: string;
+		progress: number;
+	}
+
+	const extractFrontmatter = (markdown: string) => {
+		const result = parseFrontMatter(markdown);
+		if (result.data) {
+			const { data } = result;
+			// console.warn("Extracted data:", data);
+			return data as Frontmatter;
+		}
+		return null;
 	};
 
 	const parseIssues = (response: IssueSchemaWithBasicLabels): Task => {
@@ -128,7 +139,6 @@ const App = () => {
 
 		if (frontmatter) {
 			start = parseISO(frontmatter.start);
-			console.warn(start, isValid(start));
 			if (!isValid(start)) {
 				start = null;
 			}
@@ -143,7 +153,9 @@ const App = () => {
 		}
 
 		return {
-			start: start || endDate,
+			// start: start || endDate,
+			// end: endDate,
+			start: endDate,
 			end: endDate,
 			name: response.title,
 			id: `${response.iid}`,
@@ -162,38 +174,35 @@ const App = () => {
 		setIsDialogOpen(false);
 	};
 
+	const getUsersLanguage = () => {
+		return navigator.language;
+	};
+
 	return (
 		<>
-			<Button
-				onClick={openDialog}
-				className="rounded-md bg-black/20 py-2 px-4 text-sm font-medium text-white focus:outline-none data-[hover]:bg-black/30 data-[focus]:outline-1 data-[focus]:outline-white"
-			>
-				⚙️
-			</Button>
-			<SettingsDialog isOpen={isDialogOpen} onClose={closeDialog} />
-			<Fieldset className="space-y-8">
-				<Legend className="text-lg font-bold">Host Settings</Legend>
-				<Field>
-					<Label className="block text-xs font-medium text-gray-700">
-						GitLab URL
-					</Label>
-					<Input
-						className="mt-1 w-full rounded-md border-gray-200 shadow-sm sm:text-sm"
-						name="gitlab-url"
-						value={gitlabUrl}
-						onChange={(e) => setGitlabUrl(e.target.value)}
-					/>
-				</Field>
-				<Field>
-					<Label>Access Token</Label>
-					<Input
-						name="access-token"
-						value={token}
-						onChange={(e) => setToken(e.target.value)}
-					/>
-				</Field>
-			</Fieldset>
-			<Button onClick={handleSaveSettings}>保存</Button>
+			<header className="flex gap-2 p-2 bg-gray-100">
+				<span className="text-2xl md:text-3xl">
+					🦝 <span className="md:text-2xl font-bold">LabGantt</span>
+				</span>
+				<Button
+					onClick={openDialog}
+					className="rounded-md bg-black/20 py-2 px-4 text-sm font-medium text-white focus:outline-none data-[hover]:bg-black/30 data-[focus]:outline-1 data-[focus]:outline-white"
+				>
+					⚙️
+				</Button>
+			</header>
+			<SettingsDialog
+				{...{
+					gitlabDomain,
+					setGitLabDomain,
+					gitlabAccessToken,
+					setGitLabAccessToken,
+				}}
+				open={isDialogOpen}
+				onClose={closeDialog}
+				onSettingsSaved={setGitLabClient}
+				gitlabInstance={gitlabClient}
+			/>
 			<Select
 				value={selectedGroupId}
 				onChange={(e) => handleGroupChange(e.target.value)}
@@ -215,7 +224,8 @@ const App = () => {
 			</Select>
 			<Select
 				value={selectedProjectId}
-				onChange={(e) => setSelectedProjectId(e.target.value)}
+				// onChange={(e) => setSelectedProjectId(e.target.value)}
+				onChange={(e) => handleProjectChange(e.target.value)}
 			>
 				<option value="" disabled>
 					プロジェクトを選択
@@ -232,8 +242,13 @@ const App = () => {
 					</option>
 				)}
 			</Select>
-			<Button onClick={handleFetchIssues}>取得</Button>
-			{tasks.length > 0 && <Gantt tasks={tasks} />}
+			{
+				<Gantt
+					tasks={tasks}
+					onClick={(e) => console.warn(e)}
+					locale={getUsersLanguage()}
+				/>
+			}
 		</>
 	);
 };

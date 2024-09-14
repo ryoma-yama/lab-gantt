@@ -11,34 +11,38 @@
 		"prepare": "husky"
 	},
 	"dependencies": {
-		"@gitbeaker/rest": "^40.1.2",
-		"@headlessui/react": "^2.1.2",
+		"@gitbeaker/rest": "^40.2.0",
+		"@headlessui/react": "^2.1.5",
+		"clsx": "^2.1.1",
 		"date-fns": "^3.6.0",
 		"gantt-task-react": "^0.3.9",
+		"neo-gantt-task-react": "^0.9.10",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",
-		"@types/react": "^18.3.3",
+		"@tailwindcss/forms": "^0.5.9",
+		"@types/react": "^18.3.5",
 		"@types/react-dom": "^18.3.0",
-		"@typescript-eslint/eslint-plugin": "^7.15.0",
-		"@typescript-eslint/parser": "^7.15.0",
-		"@vitejs/plugin-react-swc": "^3.5.0",
+		"@typescript-eslint/eslint-plugin": "^7.18.0",
+		"@typescript-eslint/parser": "^7.18.0",
+		"@vitejs/plugin-react-swc": "^3.7.0",
 		"autoprefixer": "^10.4.20",
 		"eslint": "^8.57.0",
 		"eslint-plugin-react-hooks": "^4.6.2",
-		"eslint-plugin-react-refresh": "^0.4.7",
-		"husky": "^9.1.3",
-		"lint-staged": "^15.2.7",
-		"postcss": "^8.4.40",
-		"tailwindcss": "^3.4.7",
-		"typescript": "^5.2.2",
-		"vite": "^5.3.4"
+		"eslint-plugin-react-refresh": "^0.4.11",
+		"husky": "^9.1.5",
+		"lint-staged": "^15.2.10",
+		"postcss": "^8.4.45",
+		"tailwindcss": "^3.4.10",
+		"typescript": "^5.5.4",
+		"vite": "^5.4.3"
 	},
 	"lint-staged": {
 		"*.{ts,tsx}": [
 			"biome check --write --no-errors-on-unmatched"
 		]
-	}
+	},
+	"packageManager": "pnpm@9.9.0+sha512.60c18acd138bff695d339be6ad13f7e936eea6745660d4cc4a776d5247c540d0edee1a563695c183a66eb917ef88f2b4feb1fc25f32a7adcadc7aaf3438e99c1"
 }
