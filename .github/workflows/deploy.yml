@@ -27,8 +27,6 @@ jobs:
 
       - run: pnpm build
 
-      - run: ls -al ./dist
-
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
