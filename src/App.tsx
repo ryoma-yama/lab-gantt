@@ -1,5 +1,5 @@
 import { Button, Select } from "@headlessui/react";
-import { type DisplayOption, Gantt, type Task } from "neo-gantt-task-react";
+import { Gantt, type Task } from "neo-gantt-task-react";
 import { useCallback, useEffect, useState } from "react";
 import "neo-gantt-task-react/style.css";
 
@@ -90,32 +90,32 @@ const App = () => {
 		loadProjectsIssues(projectId);
 	};
 
-	const fetchIssues = async (projectId: string) => {
-		try {
-			if (!gitlabClient) return [];
-			const response = await gitlabClient.Issues.all({ projectId });
-			return response;
-		} catch (error) {
-			console.error("Error fetching issues:", error);
-			throw error;
-		}
-	};
+	// const fetchIssues = async (projectId: string) => {
+	// 	try {
+	// 		if (!gitlabClient) return [];
+	// 		const response = await gitlabClient.Issues.all({ projectId });
+	// 		return response;
+	// 	} catch (error) {
+	// 		console.error("Error fetching issues:", error);
+	// 		throw error;
+	// 	}
+	// };
 	const [tasks, setTasks] = useState<Task[]>([]);
-	const handleFetchIssues = async () => {
-		try {
-			const data = await fetchIssues(selectedProjectId);
-			// if (data.length === 0) {
-			// 	// TODO: Add Message.
-			// 	console.warn("No Issues.");
-			// 	return;
-			// }
-			const tasks = data.map(parseIssues);
-			console.warn(tasks);
-			setTasks(tasks);
-		} catch (error) {
-			console.error("Error loading issues:", error);
-		}
-	};
+	// const handleFetchIssues = async () => {
+	// 	try {
+	// 		const data = await fetchIssues(selectedProjectId);
+	// 		// if (data.length === 0) {
+	// 		// 	// TODO: Add Message.
+	// 		// 	console.warn("No Issues.");
+	// 		// 	return;
+	// 		// }
+	// 		const tasks = data.map(parseIssues);
+	// 		console.warn(tasks);
+	// 		setTasks(tasks);
+	// 	} catch (error) {
+	// 		console.error("Error loading issues:", error);
+	// 	}
+	// };
 
 	interface Frontmatter {
 		start: string;
