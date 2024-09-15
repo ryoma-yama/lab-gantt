@@ -10,6 +10,7 @@ import {
 	type IssueSchemaWithBasicLabels,
 } from "@gitbeaker/rest";
 import { isValid, parseISO } from "date-fns";
+import GitHubLogo from "./GitHubLogo";
 import SettingsDialog from "./SettingsDialog";
 import { parseFrontMatter } from "./frontMatterParser";
 
@@ -90,32 +91,7 @@ const App = () => {
 		loadProjectsIssues(projectId);
 	};
 
-	// const fetchIssues = async (projectId: string) => {
-	// 	try {
-	// 		if (!gitlabClient) return [];
-	// 		const response = await gitlabClient.Issues.all({ projectId });
-	// 		return response;
-	// 	} catch (error) {
-	// 		console.error("Error fetching issues:", error);
-	// 		throw error;
-	// 	}
-	// };
 	const [tasks, setTasks] = useState<Task[]>([]);
-	// const handleFetchIssues = async () => {
-	// 	try {
-	// 		const data = await fetchIssues(selectedProjectId);
-	// 		// if (data.length === 0) {
-	// 		// 	// TODO: Add Message.
-	// 		// 	console.warn("No Issues.");
-	// 		// 	return;
-	// 		// }
-	// 		const tasks = data.map(parseIssues);
-	// 		console.warn(tasks);
-	// 		setTasks(tasks);
-	// 	} catch (error) {
-	// 		console.error("Error loading issues:", error);
-	// 	}
-	// };
 
 	interface Frontmatter {
 		start: string;
@@ -189,7 +165,9 @@ const App = () => {
 					className="rounded-md bg-black/20 py-2 px-4 text-sm font-medium text-white focus:outline-none data-[hover]:bg-black/30 data-[focus]:outline-1 data-[focus]:outline-white"
 				>
 					⚙️
+					{/* <Cog6ToothIcon className="text-blue-500"/> */}
 				</Button>
+				<GitHubLogo />
 			</header>
 			<SettingsDialog
 				{...{
