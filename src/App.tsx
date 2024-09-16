@@ -78,6 +78,7 @@ const App = () => {
 		try {
 			if (!gitlabClient) return;
 			const response = await gitlabClient.Issues.all({ projectId });
+			console.warn(response);
 			const tasks = response.map(parseIssues);
 			console.warn(tasks);
 			setTasks(tasks);
@@ -129,9 +130,8 @@ const App = () => {
 		}
 
 		return {
-			// start: start || endDate,
-			// end: endDate,
-			start: endDate,
+			// start: endDate,
+			start: start || endDate,
 			end: endDate,
 			name: response.title,
 			id: `${response.iid}`,
@@ -139,6 +139,7 @@ const App = () => {
 			progress: progress !== null ? progress : 0,
 			isDisabled: false,
 			styles: { progressColor: "#ffbb54", progressSelectedColor: "#ff9e0d" },
+			url: response.web_url,
 		};
 	};
 
