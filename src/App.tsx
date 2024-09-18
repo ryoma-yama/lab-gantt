@@ -45,21 +45,33 @@ const App = () => {
 		};
 
 		const client = initializeGitlabClient();
-		if (client) {
-			setGitLabClient(client);
-			loadGroups(client);
-		} else {
+		if (client === null) {
 			setIsDialogOpen(true);
+			return;
 		}
+		setGitLabClient(client);
+		loadGroups(client);
+
+		if (selectedGroupId === "") return;
+		loadGroupsProject(selectedGroupId, client);
+
+		if (selectedProjectId === "") return;
+		loadProjectsIssues(selectedProjectId, client);
 	}, [initializeGitlabClient]);
 
 	const [groups, setGroups] = useState<GroupSchema[]>([]);
-	const [selectedGroupId, setSelectedGroupId] = useState("");
+	const [selectedGroupId, setSelectedGroupId] = useState(
+		localStorage.getItem("SELECTED_GROUP_ID") || "",
+	);
 
-	const loadGroupsProject = async (groupId: string) => {
+	const loadGroupsProject = async (
+		groupId: string,
+		client: GitLabClinet | null,
+	) => {
 		try {
-			if (!gitlabClient) return;
-			const response = await gitlabClient.Groups.allProjects(groupId);
+			if (!client) return;
+			const response = await client.Groups.allProjects(groupId);
+			console.warn(response);
 			setProjects(response);
 		} catch (error) {
 			console.error("Error loading projects:", error);
@@ -68,16 +80,22 @@ const App = () => {
 
 	const handleGroupChange = (groupId: string) => {
 		setSelectedGroupId(groupId);
-		loadGroupsProject(groupId);
+		localStorage.setItem("SELECTED_GROUP_ID", groupId);
+		loadGroupsProject(groupId, gitlabClient);
 	};
 
 	const [projects, setProjects] = useState<CondensedProjectSchema[]>([]);
-	const [selectedProjectId, setSelectedProjectId] = useState("");
+	const [selectedProjectId, setSelectedProjectId] = useState(
+		localStorage.getItem("SELECTED_PROJECT_ID") || "",
+	);
 
-	const loadProjectsIssues = async (projectId: string) => {
+	const loadProjectsIssues = async (
+		projectId: string,
+		client: GitLabClinet | null,
+	) => {
 		try {
-			if (!gitlabClient) return;
-			const response = await gitlabClient.Issues.all({ projectId });
+			if (!client) return;
+			const response = await client.Issues.all({ projectId });
 			console.warn(response);
 			const tasks = response.map(parseIssues);
 			console.warn(tasks);
@@ -89,7 +107,8 @@ const App = () => {
 
 	const handleProjectChange = (projectId: string) => {
 		setSelectedProjectId(projectId);
-		loadProjectsIssues(projectId);
+		localStorage.setItem("SELECTED_PROJECT_ID", projectId);
+		loadProjectsIssues(projectId, gitlabClient);
 	};
 
 	const [tasks, setTasks] = useState<Task[]>([]);
@@ -203,7 +222,6 @@ const App = () => {
 			</Select>
 			<Select
 				value={selectedProjectId}
-				// onChange={(e) => setSelectedProjectId(e.target.value)}
 				onChange={(e) => handleProjectChange(e.target.value)}
 			>
 				<option value="" disabled>
