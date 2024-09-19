@@ -176,7 +176,7 @@ const App = () => {
 
 	return (
 		<>
-			<header className="flex gap-2 p-2 bg-gray-100">
+			<header className="flex gap-2 p-2 mb-2 bg-gray-100">
 				<span className="text-2xl md:text-3xl">
 					🦝 <span className="md:text-2xl font-bold">LabGantt</span>
 				</span>
@@ -201,51 +201,61 @@ const App = () => {
 				onSettingsSaved={setGitLabClient}
 				gitlabInstance={gitlabClient}
 			/>
-			<Select
-				value={selectedGroupId}
-				onChange={(e) => handleGroupChange(e.target.value)}
-			>
-				<option value="" disabled>
-					グループを選択
-				</option>
-				{Array.isArray(groups) && groups.length > 0 ? (
-					groups.map((project) => (
-						<option key={project.id} value={project.id}>
-							{project.name}
-						</option>
-					))
+			<div className="pl-2">
+				{gitlabClient === null ? (
+					<p>Please authenticate to access GitLab data.</p>
 				) : (
-					<option value="" disabled>
-						グループがありません
-					</option>
+					<>
+						<Select
+							value={selectedGroupId}
+							onChange={(e) => handleGroupChange(e.target.value)}
+						>
+							<option value="" disabled>
+								Select a group
+							</option>
+							{groups.length > 0 ? (
+								groups.map((group) => (
+									<option key={group.id} value={group.id}>
+										{group.name}
+									</option>
+								))
+							) : (
+								<option value="" disabled>
+									No groups found
+								</option>
+							)}
+						</Select>
+						{selectedGroupId && (
+							<Select
+								value={selectedProjectId}
+								onChange={(e) => handleProjectChange(e.target.value)}
+							>
+								<option value="" disabled>
+									Select a project
+								</option>
+								{projects.length > 0 ? (
+									projects.map((project) => (
+										<option key={project.id} value={project.id}>
+											{project.name}
+										</option>
+									))
+								) : (
+									<option value="" disabled>
+										No projects found
+									</option>
+								)}
+							</Select>
+						)}
+						{selectedProjectId && (
+							<Gantt
+								tasks={tasks}
+								onClick={(e) => console.warn(e)}
+								locale={getUsersLanguage()}
+							/>
+						)}
+					</>
 				)}
-			</Select>
-			<Select
-				value={selectedProjectId}
-				onChange={(e) => handleProjectChange(e.target.value)}
-			>
-				<option value="" disabled>
-					プロジェクトを選択
-				</option>
-				{Array.isArray(projects) && projects.length > 0 ? (
-					projects.map((project) => (
-						<option key={project.id} value={project.id}>
-							{project.name}
-						</option>
-					))
-				) : (
-					<option value="" disabled>
-						プロジェクトがありません
-					</option>
-				)}
-			</Select>
-			{
-				<Gantt
-					tasks={tasks}
-					onClick={(e) => console.warn(e)}
-					locale={getUsersLanguage()}
-				/>
-			}
+			</div>
 		</>
 	);
 };
