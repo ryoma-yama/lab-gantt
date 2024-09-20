@@ -96,9 +96,11 @@ const App = () => {
 		try {
 			if (!client) return;
 			const response = await client.Issues.all({ projectId });
-			console.warn(response);
+			// このAPIは、プロジェクトに関連するすべてのIssueとTaskを返す。
+			// クライアントの問題かもしれないが、response.typeに"issue"と"task"の区別があり、taskの場合はdescriptionがnullになる。
+			console.warn("Issues:", response);
 			const tasks = response.map(parseIssues);
-			console.warn(tasks);
+			console.warn("Parsed issues:", tasks);
 			setTasks(tasks);
 		} catch (error) {
 			console.error("Error loading issues:", error);
@@ -119,8 +121,9 @@ const App = () => {
 	}
 
 	const extractFrontmatter = (markdown: string) => {
-		const result = parseFrontMatter(markdown);
-		if (result.data) {
+		const result = parseFrontMatter<Frontmatter>(markdown);
+		// console.warn("Parsed frontmatter:", result);
+		if (result.data.start) {
 			const { data } = result;
 			// console.warn("Extracted data:", data);
 			return data as Frontmatter;
@@ -129,16 +132,24 @@ const App = () => {
 	};
 
 	const parseIssues = (response: IssueSchemaWithBasicLabels): Task => {
-		const frontmatter = extractFrontmatter(response.description);
+		// type ISSUE_TYPES = "ISSUE" | "TASK";
+		// 問題は、response.typeが"ISSUE"または"TASK"のどちらかであることではなく、descriptionが空文字だけではなくnullになること。
+		// console.log("Parsing issue:", response);
+		// console.warn("Parsing issue's description:", response.description);
+
 		let start: Date | null = null;
 		let progress: number | null = null;
 
-		if (frontmatter) {
-			start = parseISO(frontmatter.start);
-			if (!isValid(start)) {
-				start = null;
+		if (response.description && response.description.length > 0) {
+			const frontmatter = extractFrontmatter(response.description);
+			if (frontmatter) {
+				// console.warn(frontmatter);
+				start = parseISO(frontmatter.start);
+				if (!isValid(start)) {
+					start = null;
+				}
+				progress = frontmatter.progress;
 			}
-			progress = frontmatter.progress;
 		}
 
 		const endDate = response.due_date
