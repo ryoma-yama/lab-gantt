@@ -35,6 +35,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
 }) => {
 	const [invalid, setInvalid] = useState(true);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
 	useEffect(() => {
 		setInvalid(gitlabDomain.trim() === "" || gitlabAccessToken.trim() === "");
@@ -57,10 +58,13 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
 				return;
 			}
 
+			setSuccessMessage("✔success!");
 			localStorage.setItem("GITLAB_DOMAIN", gitlabDomain);
 			localStorage.setItem("GITLAB_ACCESS_TOKEN", gitlabAccessToken);
 			onSettingsSaved(api);
-			onClose();
+			setTimeout(() => {
+				onClose();
+			}, 1000);
 		} catch (error) {
 			setErrorMessage(
 				"Failed to retrieve user information. Please check your domain and access token.",
@@ -92,6 +96,9 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
 						<div className="h-6">
 							{errorMessage && (
 								<div className="text-red-600">{errorMessage}</div>
+							)}
+							{successMessage && (
+								<div className="text-green-600">{successMessage}</div>
 							)}
 						</div>
 						<Field>
