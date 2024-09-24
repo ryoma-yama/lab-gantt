@@ -116,7 +116,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
 						<Field>
 							<Label className="text-gray-700">Personal Access Token</Label>
 							<Input
-								type="text"
+								type="password"
 								name="gitlabAccessToken"
 								value={gitlabAccessToken}
 								onChange={(e) => setGitLabAccessToken(e.target.value)}
