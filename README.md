@@ -39,15 +39,15 @@ To display GitLab issues as Gantt charts, include the following YAML in the issu
 | Parameter  | Type   | Required | Description                                            |
 |------------|--------|----------|--------------------------------------------------------|
 | `start`    | Date   | Yes      | Start date in `YYYY-MM-DD` format.                     |
-| `end`      | Date   | No       | End date in `YYYY-MM-DD` format.                       |
 | `progress` | Number | No       | Progress as a percentage (`0-100`).                    |
+
+**Note:** Please set the **due date** in the issue's native field.
 
 Example:
 
 ```yaml
 ---
 start: 2024-08-05
-end: 2024-08-10
 progress: 50
 ---
 ```

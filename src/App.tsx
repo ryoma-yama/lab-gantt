@@ -1,4 +1,15 @@
-import { Button, Select } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+
+import { Settings } from "lucide-react";
 import { Gantt, type Task } from "neo-gantt-task-react";
 import { useCallback, useEffect, useState } from "react";
 import "neo-gantt-task-react/style.css";
@@ -188,17 +199,80 @@ const App = () => {
 	return (
 		<>
 			<header className="flex gap-2 p-2 mb-2 bg-gray-100">
-				<span className="text-2xl md:text-3xl">
+				<span className="text-2xl md:text-3xl flex-none mr-2">
 					🦝 <span className="md:text-2xl font-bold">LabGantt</span>
 				</span>
-				<Button
-					onClick={openDialog}
-					className="rounded-md bg-black/20 py-2 px-4 text-sm font-medium text-white focus:outline-none data-[hover]:bg-black/30 data-[focus]:outline-1 data-[focus]:outline-white"
-				>
-					⚙️
-					{/* <Cog6ToothIcon className="text-blue-500"/> */}
-				</Button>
-				<GitHubLogo />
+				<div className="flex gap-2">
+					{gitlabClient === null ? (
+						<p>Please authenticate to access GitLab data.</p>
+					) : (
+						<>
+							<Select
+								value={selectedGroupId}
+								onValueChange={(value) => handleGroupChange(value)}
+							>
+								<SelectTrigger className="w-[180px]">
+									<SelectValue placeholder="Select a group" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectGroup>
+										<SelectLabel>Select a group</SelectLabel>
+										{groups.length > 0 ? (
+											groups.map((group) => (
+												<SelectItem key={group.id} value={`${group.id}`}>
+													{group.name}
+												</SelectItem>
+											))
+										) : (
+											<SelectItem value="0" disabled>
+												No groups found
+											</SelectItem>
+										)}
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+
+							{selectedGroupId && (
+								<>
+									<span className="flex items-center">/</span>
+									<Select
+										value={selectedProjectId}
+										onValueChange={(value) => handleProjectChange(value)}
+									>
+										<SelectTrigger className="w-[180px]">
+											<SelectValue placeholder="Select a project" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectGroup>
+												<SelectLabel>Select a project</SelectLabel>
+												{projects.length > 0 ? (
+													projects.map((project) => (
+														<SelectItem
+															key={project.id}
+															value={`${project.id}`}
+														>
+															{project.name}
+														</SelectItem>
+													))
+												) : (
+													<SelectItem value="0" disabled>
+														No projects found
+													</SelectItem>
+												)}
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+								</>
+							)}
+						</>
+					)}
+					<Button onClick={openDialog} variant="outline" size="icon">
+						<Settings className="h-4 w-4" />
+					</Button>
+				</div>
+				<div className="ml-auto">
+					<GitHubLogo />
+				</div>
 			</header>
 			<SettingsDialog
 				{...{
@@ -217,46 +291,6 @@ const App = () => {
 					<p>Please authenticate to access GitLab data.</p>
 				) : (
 					<>
-						<Select
-							value={selectedGroupId}
-							onChange={(e) => handleGroupChange(e.target.value)}
-						>
-							<option value="" disabled>
-								Select a group
-							</option>
-							{groups.length > 0 ? (
-								groups.map((group) => (
-									<option key={group.id} value={group.id}>
-										{group.name}
-									</option>
-								))
-							) : (
-								<option value="" disabled>
-									No groups found
-								</option>
-							)}
-						</Select>
-						{selectedGroupId && (
-							<Select
-								value={selectedProjectId}
-								onChange={(e) => handleProjectChange(e.target.value)}
-							>
-								<option value="" disabled>
-									Select a project
-								</option>
-								{projects.length > 0 ? (
-									projects.map((project) => (
-										<option key={project.id} value={project.id}>
-											{project.name}
-										</option>
-									))
-								) : (
-									<option value="" disabled>
-										No projects found
-									</option>
-								)}
-							</Select>
-						)}
 						{selectedProjectId && (
 							<Gantt
 								tasks={tasks}
