@@ -13,16 +13,22 @@
 		"@gitbeaker/rest": "^40.2.1",
 		"@headlessui/react": "^2.1.8",
 		"@heroicons/react": "^2.1.5",
+		"@radix-ui/react-slot": "^1.1.0",
+		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"date-fns": "^3.6.0",
 		"gantt-task-react": "^0.3.9",
+		"lucide-react": "^0.445.0",
 		"neo-gantt-task-react": "^0.10.1",
 		"react": "^18.3.1",
-		"react-dom": "^18.3.1"
+		"react-dom": "^18.3.1",
+		"tailwind-merge": "^2.5.2",
+		"tailwindcss-animate": "^1.0.7"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.0",
 		"@tailwindcss/forms": "^0.5.9",
+		"@types/node": "^22.5.5",
 		"@types/react": "^18.3.6",
 		"@types/react-dom": "^18.3.0",
 		"@vitejs/plugin-react-swc": "^3.7.0",
@@ -39,5 +45,5 @@
 			"biome check --write --no-errors-on-unmatched"
 		]
 	},
-	"packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
+	"packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b"
 }

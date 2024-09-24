@@ -1,4 +1,6 @@
-import { Button, Select } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
+import { Select } from "@headlessui/react";
+import { Settings } from "lucide-react";
 import { Gantt, type Task } from "neo-gantt-task-react";
 import { useCallback, useEffect, useState } from "react";
 import "neo-gantt-task-react/style.css";
@@ -191,12 +193,8 @@ const App = () => {
 				<span className="text-2xl md:text-3xl">
 					🦝 <span className="md:text-2xl font-bold">LabGantt</span>
 				</span>
-				<Button
-					onClick={openDialog}
-					className="rounded-md bg-black/20 py-2 px-4 text-sm font-medium text-white focus:outline-none data-[hover]:bg-black/30 data-[focus]:outline-1 data-[focus]:outline-white"
-				>
-					⚙️
-					{/* <Cog6ToothIcon className="text-blue-500"/> */}
+				<Button onClick={openDialog} variant="outline" size="icon">
+					<Settings className="h-4 w-4" />
 				</Button>
 				<GitHubLogo />
 			</header>
