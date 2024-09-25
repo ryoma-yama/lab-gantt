@@ -1,19 +1,25 @@
-import { Gitlab } from "@gitbeaker/rest";
+import { Button } from "@/components/ui/button";
 import {
-	Button,
 	Dialog,
-	DialogPanel,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
 	DialogTitle,
-	Field,
-	Input,
-	Label,
-} from "@headlessui/react";
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Gitlab } from "@gitbeaker/rest";
+
+import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 
 interface SettingsDialogProps {
 	open: boolean;
+	onOpen: () => void;
 	onClose: () => void;
 	// onSettingsSaved: () => void;
 	onSettingsSaved: SetState<InstanceType<typeof Gitlab<false>> | null>;
@@ -26,6 +32,7 @@ interface SettingsDialogProps {
 
 const SettingsDialog: React.FC<SettingsDialogProps> = ({
 	open,
+	onOpen,
 	onClose,
 	onSettingsSaved,
 	gitlabDomain,
@@ -72,69 +79,60 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
 		}
 	};
 
-	const defaultInput =
-		"block w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-200 focus: ring-opacity-50 focus:border-indigo-300";
-
-	const defaultButton =
-		"block w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500";
-
-	const disabledButton =
-		"block w-full px-4 py-2 text-sm font-medium text-white bg-gray-400 border border-transparent rounded-md shadow-sm cursor-not-allowed";
-
 	return (
-		<Dialog
-			{...{ open, onClose }}
-			transition
-			className="fixed inset-0 flex w-screen items-center justify-center bg-black/30 p-4 transition duration-300 ease-out data-[closed]:opacity-0"
-		>
-			<DialogPanel className="max-w-lg w-full space-y-4 bg-white p-12">
-				<DialogTitle className="text-2xl font-bold mb-4">
-					Please setting
-				</DialogTitle>
+		<Dialog open={open} onOpenChange={(open) => open || onClose()}>
+			<DialogTrigger asChild>
+				<Button onClick={onOpen} variant="outline" size="icon">
+					<Settings className="h-4 w-4" />
+				</Button>
+			</DialogTrigger>
+			<DialogContent className="sm:max-w-[425px]">
+				<DialogHeader>
+					<DialogTitle>Enter Authentication Information</DialogTitle>
+					<DialogDescription>
+						Please enter your GitLab domain and Personal Access Token.
+					</DialogDescription>
+				</DialogHeader>
 				<form onSubmit={handleSaveSettings}>
-					<div className="grid grid-cols-1 gap-6 mt-4">
-						<div className="h-6">
-							{errorMessage && (
-								<div className="text-red-600">{errorMessage}</div>
-							)}
-							{successMessage && (
-								<div className="text-green-600">{successMessage}</div>
-							)}
-						</div>
-						<Field>
-							<Label className="text-gray-700">GitLab Domain</Label>
-							<Input
-								type="text"
-								name="gitlabDomain"
-								value={gitlabDomain}
-								onChange={(e) => setGitLabDomain(e.target.value)}
-								className={defaultInput}
-								placeholder="https://gitlab.com"
-								required={true}
-							/>
-						</Field>
-						<Field>
-							<Label className="text-gray-700">Personal Access Token</Label>
-							<Input
-								type="password"
-								name="gitlabAccessToken"
-								value={gitlabAccessToken}
-								onChange={(e) => setGitLabAccessToken(e.target.value)}
-								className={defaultInput}
-								placeholder="glpat-***"
-								required
-							/>
-						</Field>
-						<Button
-							type="submit"
-							className={invalid ? disabledButton : defaultButton}
-							disabled={invalid}
-						>
+					<div className="grid grid-cols-1 gap-4 mb-4">
+						<Label htmlFor="gitlabDomain">GitLab Domain</Label>
+						<Input
+							type="text"
+							id="gitlabDomain"
+							value={gitlabDomain}
+							onChange={(e) => setGitLabDomain(e.target.value)}
+							placeholder="https://gitlab.com"
+							required
+						/>
+						<Label htmlFor="gitlabAccessToken">Personal Access Token</Label>
+						<Input
+							type="password"
+							id="gitlabAccessToken"
+							value={gitlabAccessToken}
+							onChange={(e) => setGitLabAccessToken(e.target.value)}
+							placeholder="glpat-***"
+							required
+						/>
+					</div>
+					<DialogFooter className="">
+						<p>
+							<span className="font-bold">Note: </span>
+							The authentication information will be stored in your browser's
+							local storage. Therefore, it is not recommended to use this on
+							public or shared devices.
+						</p>
+						<Button type="submit" disabled={invalid}>
 							Save
 						</Button>
-					</div>
+					</DialogFooter>
 				</form>
-			</DialogPanel>
+				<div className="h-6 mb-6">
+					{errorMessage && <div className="text-red-600">{errorMessage}</div>}
+					{successMessage && (
+						<div className="text-green-600">{successMessage}</div>
+					)}
+				</div>
+			</DialogContent>
 		</Dialog>
 	);
 };

@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
 	Select,
 	SelectContent,
@@ -8,11 +7,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-
-import { Settings } from "lucide-react";
 import { Gantt, type Task } from "neo-gantt-task-react";
-import { useCallback, useEffect, useState } from "react";
 import "neo-gantt-task-react/style.css";
+import { useCallback, useEffect, useState } from "react";
 
 import {
 	type CondensedProjectSchema,
@@ -266,26 +263,24 @@ const App = () => {
 							)}
 						</>
 					)}
-					<Button onClick={openDialog} variant="outline" size="icon">
-						<Settings className="h-4 w-4" />
-					</Button>
+					<SettingsDialog
+						{...{
+							gitlabDomain,
+							setGitLabDomain,
+							gitlabAccessToken,
+							setGitLabAccessToken,
+						}}
+						open={isDialogOpen}
+						onOpen={openDialog}
+						onClose={closeDialog}
+						onSettingsSaved={setGitLabClient}
+						gitlabInstance={gitlabClient}
+					/>
 				</div>
 				<div className="ml-auto">
 					<GitHubLogo />
 				</div>
 			</header>
-			<SettingsDialog
-				{...{
-					gitlabDomain,
-					setGitLabDomain,
-					gitlabAccessToken,
-					setGitLabAccessToken,
-				}}
-				open={isDialogOpen}
-				onClose={closeDialog}
-				onSettingsSaved={setGitLabClient}
-				gitlabInstance={gitlabClient}
-			/>
 			<div className="pl-2">
 				{gitlabClient === null ? (
 					<p>Please authenticate to access GitLab data.</p>
