@@ -11,7 +11,7 @@
 		"prepare": "husky"
 	},
 	"dependencies": {
-		"@gitbeaker/rest": "^40.2.1",
+		"@gitbeaker/rest": "^40.2.3",
 		"@radix-ui/react-dialog": "^1.1.1",
 		"@radix-ui/react-label": "^2.1.0",
 		"@radix-ui/react-select": "^2.1.1",
@@ -20,7 +20,7 @@
 		"clsx": "^2.1.1",
 		"date-fns": "^3.6.0",
 		"lucide-react": "^0.445.0",
-		"neo-gantt-task-react": "^0.10.1",
+		"neo-gantt-task-react": "^0.10.2",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
 		"tailwind-merge": "^2.5.2",
@@ -29,17 +29,17 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.0",
 		"@tailwindcss/forms": "^0.5.9",
-		"@types/node": "^22.5.5",
-		"@types/react": "^18.3.6",
+		"@types/node": "^22.7.2",
+		"@types/react": "^18.3.9",
 		"@types/react-dom": "^18.3.0",
 		"@vitejs/plugin-react-swc": "^3.7.0",
 		"autoprefixer": "^10.4.20",
 		"husky": "^9.1.6",
 		"lint-staged": "^15.2.10",
 		"postcss": "^8.4.47",
-		"tailwindcss": "^3.4.11",
+		"tailwindcss": "^3.4.13",
 		"typescript": "^5.6.2",
-		"vite": "^5.4.6"
+		"vite": "^5.4.8"
 	},
 	"lint-staged": {
 		"*.{ts,tsx}": [
