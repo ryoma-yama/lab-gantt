@@ -114,7 +114,7 @@ const SettingsDialog: React.FC<SettingsDialogProps> = ({
 							required
 						/>
 					</div>
-					<DialogFooter className="">
+					<DialogFooter>
 						<p>
 							<span className="font-bold">Note: </span>
 							The authentication information will be stored in your browser's

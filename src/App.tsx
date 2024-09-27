@@ -19,7 +19,8 @@ import {
 } from "@gitbeaker/rest";
 import { isValid, parseISO } from "date-fns";
 import GitHubLogo from "./GitHubLogo";
-import SettingsDialog from "./SettingsDialog";
+import HelpCollapsible from "./components/gantt/HelpCollapsible";
+import SettingsDialog from "./components/gantt/SettingsDialog";
 import { parseFrontMatter } from "./frontMatterParser";
 
 const App = () => {
@@ -281,17 +282,21 @@ const App = () => {
 					<GitHubLogo />
 				</div>
 			</header>
-			<div className="pl-2">
+			<div className="px-2">
 				{gitlabClient === null ? (
 					<p>Please authenticate to access GitLab data.</p>
 				) : (
 					<>
 						{selectedProjectId && (
-							<Gantt
-								tasks={tasks}
-								onClick={(e) => console.warn(e)}
-								locale={getUsersLanguage()}
-							/>
+							<>
+								<HelpCollapsible />
+								<hr className="my-3 border-t-2 border-gray-300" />
+								<Gantt
+									tasks={tasks}
+									onClick={(e) => console.warn(e)}
+									locale={getUsersLanguage()}
+								/>
+							</>
 						)}
 					</>
 				)}

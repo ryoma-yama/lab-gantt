@@ -34,7 +34,7 @@ If you're using **GitHub**, consider using **GitHub Projects** with Roadmaps, wh
 
 ## 📝 Usage
 
-To display GitLab issues as Gantt charts, include the following YAML in the issue body:
+To display GitLab issues as Gantt charts, include the following YAML as frontmatter at the top of the issue body:
 
 | Parameter  | Type   | Required | Description                                            |
 |------------|--------|----------|--------------------------------------------------------|
