@@ -97,6 +97,7 @@ const App = () => {
 	const [issues, setIssues] = useState<IssueSchemaWithBasicLabels[]>([]);
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [showAllIssues, setShowAllIssues] = useState(false);
+	const [showAllMilestones, setShowAllMilestones] = useState(false);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	const initializeGitlabClient = useCallback(() => {
@@ -173,10 +174,14 @@ const App = () => {
 		const filteredIssues = showAllIssues
 			? issues
 			: issues.filter((issue) => issue.state === "opened");
-		const tasks = filteredIssues.map(parseIssues);
+
+		const finalIssues = showAllMilestones
+			? filteredIssues
+			: filteredIssues.filter((issue) => issue.milestone !== null);
+		const tasks = finalIssues.map(parseIssues);
 		console.warn("Tasks(Parsed issues):", tasks);
 		setTasks(tasks);
-	}, [issues, showAllIssues]);
+	}, [issues, showAllIssues, showAllMilestones]);
 
 	const handleProjectChange = (projectId: string) => {
 		setSelectedProjectId(projectId);
@@ -290,7 +295,14 @@ const App = () => {
 					<>
 						{selectedProjectId && (
 							<>
-								<HelpCollapsible {...{ showAllIssues, setShowAllIssues }} />
+								<HelpCollapsible
+									{...{
+										showAllIssues,
+										setShowAllIssues,
+										showAllMilestones,
+										setShowAllMilestones,
+									}}
+								/>
 								<hr className="my-3 border-t-2 border-gray-300" />
 								<Gantt
 									tasks={tasks}

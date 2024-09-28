@@ -38,9 +38,16 @@ const parameters = [
 interface ToolsProps {
 	showAllIssues: boolean;
 	setShowAllIssues: (value: boolean) => void;
+	showAllMilestones: boolean;
+	setShowAllMilestones: (value: boolean) => void;
 }
 
-const Tools: React.FC<ToolsProps> = ({ showAllIssues, setShowAllIssues }) => {
+const Tools: React.FC<ToolsProps> = ({
+	showAllIssues,
+	setShowAllIssues,
+	showAllMilestones,
+	setShowAllMilestones,
+}) => {
 	const codeRef = useRef<HTMLPreElement>(null);
 	const [copied, setCopied] = useState(false);
 
@@ -66,7 +73,11 @@ const Tools: React.FC<ToolsProps> = ({ showAllIssues, setShowAllIssues }) => {
 					<Label htmlFor="status-filter">Status: Open / All</Label>
 				</div>
 				<div className="flex items-center space-x-2">
-					<Switch id="milestone-filter" />
+					<Switch
+						id="milestone-filter"
+						checked={showAllMilestones}
+						onCheckedChange={setShowAllMilestones}
+					/>
 					<Label htmlFor="milestone-filter">Milestone: Linked / All</Label>
 				</div>
 				<CollapsibleTrigger
