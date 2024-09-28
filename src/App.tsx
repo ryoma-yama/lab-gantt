@@ -23,6 +23,60 @@ import HelpCollapsible from "./components/gantt/HelpCollapsible";
 import SettingsDialog from "./components/gantt/SettingsDialog";
 import { parseFrontMatter } from "./frontMatterParser";
 
+interface Frontmatter {
+	start: string;
+	progress: number;
+}
+
+const extractFrontmatter = (markdown: string) => {
+	const result = parseFrontMatter<Frontmatter>(markdown);
+	// console.warn("Parsed frontmatter:", result);
+	if (result.data.start) {
+		const { data } = result;
+		// console.warn("Extracted data:", data);
+		return data as Frontmatter;
+	}
+	return null;
+};
+
+const parseIssues = (response: IssueSchemaWithBasicLabels): Task => {
+	// type ISSUE_TYPES = "ISSUE" | "TASK";
+	// 問題は、response.typeが"ISSUE"または"TASK"のどちらかであることではなく、descriptionが空文字だけではなくnullになること。
+
+	let start: Date | null = null;
+	let progress: number | null = null;
+
+	if (response.description && response.description.length > 0) {
+		const frontmatter = extractFrontmatter(response.description);
+		if (frontmatter) {
+			// console.warn(frontmatter);
+			start = parseISO(frontmatter.start);
+			if (!isValid(start)) {
+				start = null;
+			}
+			progress = frontmatter.progress;
+		}
+	}
+
+	const endDate = response.due_date ? parseISO(response.due_date) : new Date();
+	if (!isValid(endDate)) {
+		console.error(`Invalid due date for issue ${response.iid}`);
+	}
+
+	return {
+		// start: endDate,
+		start: start || endDate,
+		end: endDate,
+		name: response.title,
+		id: `${response.iid}`,
+		type: "task",
+		progress: progress !== null ? progress : 0,
+		isDisabled: false,
+		styles: { progressColor: "#ffbb54", progressSelectedColor: "#ff9e0d" },
+		url: response.web_url,
+	};
+};
+
 const App = () => {
 	const [gitlabDomain, setGitLabDomain] = useState(
 		localStorage.getItem("GITLAB_DOMAIN") || "",
@@ -30,8 +84,20 @@ const App = () => {
 	const [gitlabAccessToken, setGitLabAccessToken] = useState(
 		localStorage.getItem("GITLAB_ACCESS_TOKEN") || "",
 	);
-	type GitLabClinet = InstanceType<typeof Gitlab<false>>;
-	const [gitlabClient, setGitLabClient] = useState<GitLabClinet | null>(null);
+	type GitLabClient = InstanceType<typeof Gitlab<false>>;
+	const [gitlabClient, setGitLabClient] = useState<GitLabClient | null>(null);
+	const [selectedGroupId, setSelectedGroupId] = useState(
+		localStorage.getItem("SELECTED_GROUP_ID") || "",
+	);
+	const [selectedProjectId, setSelectedProjectId] = useState(
+		localStorage.getItem("SELECTED_PROJECT_ID") || "",
+	);
+	const [groups, setGroups] = useState<GroupSchema[]>([]);
+	const [projects, setProjects] = useState<CondensedProjectSchema[]>([]);
+	const [issues, setIssues] = useState<IssueSchemaWithBasicLabels[]>([]);
+	const [tasks, setTasks] = useState<Task[]>([]);
+	const [showAllIssues, setShowAllIssues] = useState(false);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 
 	const initializeGitlabClient = useCallback(() => {
 		if (gitlabDomain && gitlabAccessToken) {
@@ -44,7 +110,7 @@ const App = () => {
 	}, [gitlabDomain, gitlabAccessToken]);
 
 	useEffect(() => {
-		const loadGroups = async (client: GitLabClinet) => {
+		const loadGroups = async (client: GitLabClient) => {
 			try {
 				const groups = await client.Groups.all();
 				setGroups(groups);
@@ -66,16 +132,11 @@ const App = () => {
 
 		if (selectedProjectId === "") return;
 		loadProjectsIssues(selectedProjectId, client);
-	}, [initializeGitlabClient]);
-
-	const [groups, setGroups] = useState<GroupSchema[]>([]);
-	const [selectedGroupId, setSelectedGroupId] = useState(
-		localStorage.getItem("SELECTED_GROUP_ID") || "",
-	);
+	}, [initializeGitlabClient, selectedGroupId, selectedProjectId]);
 
 	const loadGroupsProject = async (
 		groupId: string,
-		client: GitLabClinet | null,
+		client: GitLabClient | null,
 	) => {
 		try {
 			if (!client) return;
@@ -93,28 +154,29 @@ const App = () => {
 		loadGroupsProject(groupId, gitlabClient);
 	};
 
-	const [projects, setProjects] = useState<CondensedProjectSchema[]>([]);
-	const [selectedProjectId, setSelectedProjectId] = useState(
-		localStorage.getItem("SELECTED_PROJECT_ID") || "",
-	);
-
 	const loadProjectsIssues = async (
 		projectId: string,
-		client: GitLabClinet | null,
+		client: GitLabClient | null,
 	) => {
 		try {
 			if (!client) return;
 			const response = await client.Issues.all({ projectId });
-			// このAPIは、プロジェクトに関連するすべてのIssueとTaskを返す。
-			// クライアントの問題かもしれないが、response.typeに"issue"と"task"の区別があり、taskの場合はdescriptionがnullになる。
+			// response.typeに"issue"と"taskD"の区別があり、taskの場合はdescriptionがnullになる。
 			console.warn("Issues:", response);
-			const tasks = response.map(parseIssues);
-			console.warn("Parsed issues:", tasks);
-			setTasks(tasks);
+			setIssues(response);
 		} catch (error) {
 			console.error("Error loading issues:", error);
 		}
 	};
+
+	useEffect(() => {
+		const filteredIssues = showAllIssues
+			? issues
+			: issues.filter((issue) => issue.state === "opened");
+		const tasks = filteredIssues.map(parseIssues);
+		console.warn("Tasks(Parsed issues):", tasks);
+		setTasks(tasks);
+	}, [issues, showAllIssues]);
 
 	const handleProjectChange = (projectId: string) => {
 		setSelectedProjectId(projectId);
@@ -122,67 +184,6 @@ const App = () => {
 		loadProjectsIssues(projectId, gitlabClient);
 	};
 
-	const [tasks, setTasks] = useState<Task[]>([]);
-
-	interface Frontmatter {
-		start: string;
-		progress: number;
-	}
-
-	const extractFrontmatter = (markdown: string) => {
-		const result = parseFrontMatter<Frontmatter>(markdown);
-		// console.warn("Parsed frontmatter:", result);
-		if (result.data.start) {
-			const { data } = result;
-			// console.warn("Extracted data:", data);
-			return data as Frontmatter;
-		}
-		return null;
-	};
-
-	const parseIssues = (response: IssueSchemaWithBasicLabels): Task => {
-		// type ISSUE_TYPES = "ISSUE" | "TASK";
-		// 問題は、response.typeが"ISSUE"または"TASK"のどちらかであることではなく、descriptionが空文字だけではなくnullになること。
-		// console.log("Parsing issue:", response);
-		// console.warn("Parsing issue's description:", response.description);
-
-		let start: Date | null = null;
-		let progress: number | null = null;
-
-		if (response.description && response.description.length > 0) {
-			const frontmatter = extractFrontmatter(response.description);
-			if (frontmatter) {
-				// console.warn(frontmatter);
-				start = parseISO(frontmatter.start);
-				if (!isValid(start)) {
-					start = null;
-				}
-				progress = frontmatter.progress;
-			}
-		}
-
-		const endDate = response.due_date
-			? parseISO(response.due_date)
-			: new Date();
-		if (!isValid(endDate)) {
-			console.error(`Invalid due date for issue ${response.iid}`);
-		}
-
-		return {
-			// start: endDate,
-			start: start || endDate,
-			end: endDate,
-			name: response.title,
-			id: `${response.iid}`,
-			type: "task",
-			progress: progress !== null ? progress : 0,
-			isDisabled: false,
-			styles: { progressColor: "#ffbb54", progressSelectedColor: "#ff9e0d" },
-			url: response.web_url,
-		};
-	};
-
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const openDialog = () => {
 		setIsDialogOpen(true);
 	};
@@ -289,7 +290,7 @@ const App = () => {
 					<>
 						{selectedProjectId && (
 							<>
-								<HelpCollapsible />
+								<HelpCollapsible {...{ showAllIssues, setShowAllIssues }} />
 								<hr className="my-3 border-t-2 border-gray-300" />
 								<Gantt
 									tasks={tasks}

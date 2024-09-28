@@ -2,5 +2,13 @@
 	"editor.defaultFormatter": "biomejs.biome",
 	"files.associations": {
 		"*.css": "tailwindcss"
-	}
+	},
+	"cSpell.words": [
+		"clsx",
+		"Frontmatter",
+		"gantt",
+		"gitbeaker",
+		"glpat",
+		"lucide"
+	]
 }

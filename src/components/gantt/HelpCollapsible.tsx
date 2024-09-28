@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/table";
 
 import { buttonVariants } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { clsx } from "clsx";
 import { CheckCircle, CircleHelp, Copy } from "lucide-react";
 import { useRef, useState } from "react";
@@ -33,7 +35,12 @@ const parameters = [
 	},
 ];
 
-const Usage: React.FC = () => {
+interface ToolsProps {
+	showAllIssues: boolean;
+	setShowAllIssues: (value: boolean) => void;
+}
+
+const Tools: React.FC<ToolsProps> = ({ showAllIssues, setShowAllIssues }) => {
 	const codeRef = useRef<HTMLPreElement>(null);
 	const [copied, setCopied] = useState(false);
 
@@ -49,14 +56,28 @@ const Usage: React.FC = () => {
 
 	return (
 		<Collapsible>
-			<CollapsibleTrigger
-				className={clsx(
-					buttonVariants({ variant: "outline", size: "icon" }),
-					"mb-2",
-				)}
-			>
-				<CircleHelp className="h-4 w-4" />
-			</CollapsibleTrigger>
+			<div className="flex gap-4 mb-2">
+				<div className="flex items-center space-x-2">
+					<Switch
+						id="status-filter"
+						checked={showAllIssues}
+						onCheckedChange={setShowAllIssues}
+					/>
+					<Label htmlFor="status-filter">Status: Open / All</Label>
+				</div>
+				<div className="flex items-center space-x-2">
+					<Switch id="milestone-filter" />
+					<Label htmlFor="milestone-filter">Milestone: Linked / All</Label>
+				</div>
+				<CollapsibleTrigger
+					className={clsx(
+						buttonVariants({ variant: "outline", size: "icon" }),
+						"",
+					)}
+				>
+					<CircleHelp className="h-4 w-4" />
+				</CollapsibleTrigger>
+			</div>
 			<CollapsibleContent className="border p-2 rounded-md md:max-w-3xl lg:max-w-5xl">
 				<h2 className="text-xl font-bold mb-4">📝 Usage</h2>
 				<p className="mb-4">
@@ -121,4 +142,4 @@ const Usage: React.FC = () => {
 	);
 };
 
-export default Usage;
+export default Tools;
