@@ -20,6 +20,7 @@ import {
 import { isValid, parseISO } from "date-fns";
 import GitHubLogo from "./GitHubLogo";
 import HelpCollapsible from "./components/gantt/HelpCollapsible";
+import ProfileDialog from "./components/gantt/ProfileDialog";
 import SettingsDialog from "./components/gantt/SettingsDialog";
 import { parseFrontMatter } from "./frontMatterParser";
 
@@ -77,6 +78,11 @@ const parseIssues = (response: IssueSchemaWithBasicLabels): Task => {
 	};
 };
 
+export interface UserProfile {
+	username: string;
+	web_url: string;
+}
+
 const App = () => {
 	const [gitlabDomain, setGitLabDomain] = useState(
 		localStorage.getItem("GITLAB_DOMAIN") || "",
@@ -99,6 +105,8 @@ const App = () => {
 	const [showAllIssues, setShowAllIssues] = useState(false);
 	const [showAllMilestones, setShowAllMilestones] = useState(false);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+	const [userProfile, setUserProfile] = useState<UserProfile | null>();
 
 	const initializeGitlabClient = useCallback(() => {
 		if (gitlabDomain && gitlabAccessToken) {
@@ -111,15 +119,6 @@ const App = () => {
 	}, [gitlabDomain, gitlabAccessToken]);
 
 	useEffect(() => {
-		const loadGroups = async (client: GitLabClient) => {
-			try {
-				const groups = await client.Groups.all();
-				setGroups(groups);
-			} catch (error) {
-				console.error("Error fetching groups:", error);
-			}
-		};
-
 		const client = initializeGitlabClient();
 		if (client === null) {
 			setIsDialogOpen(true);
@@ -128,12 +127,33 @@ const App = () => {
 		setGitLabClient(client);
 		loadGroups(client);
 
+		// TODO: Migrate to Login page
+		loadCurrentUser(client);
+
 		if (selectedGroupId === "") return;
 		loadGroupsProject(selectedGroupId, client);
 
 		if (selectedProjectId === "") return;
 		loadProjectsIssues(selectedProjectId, client);
 	}, [initializeGitlabClient, selectedGroupId, selectedProjectId]);
+
+	const loadCurrentUser = async (client: GitLabClient) => {
+		try {
+			const user = await client.Users.showCurrentUser();
+			setUserProfile({ username: user.username, web_url: user.web_url });
+		} catch (error) {
+			console.error("Error fetching current user", error);
+		}
+	};
+
+	const loadGroups = async (client: GitLabClient) => {
+		try {
+			const groups = await client.Groups.all();
+			setGroups(groups);
+		} catch (error) {
+			console.error("Error fetching groups:", error);
+		}
+	};
 
 	const loadGroupsProject = async (
 		groupId: string,
@@ -269,6 +289,15 @@ const App = () => {
 								</>
 							)}
 						</>
+					)}
+					{userProfile && (
+						<ProfileDialog
+							{...{
+								userProfile,
+								isProfileDialogOpen,
+								setIsProfileDialogOpen,
+							}}
+						/>
 					)}
 					<SettingsDialog
 						{...{
