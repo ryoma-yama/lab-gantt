@@ -11,6 +11,7 @@ import { Gantt, type Task } from "neo-gantt-task-react";
 import "neo-gantt-task-react/style.css";
 import { useCallback, useEffect, useState } from "react";
 
+import { Toaster } from "@/components/ui/toaster";
 import {
 	type CondensedProjectSchema,
 	Gitlab,
@@ -330,19 +331,20 @@ const App = () => {
 										setShowAllIssues,
 										showAllMilestones,
 										setShowAllMilestones,
+										selectedProjectId,
+										issues,
+										setIssues,
 									}}
+									gitlabInstance={gitlabClient}
 								/>
 								<hr className="my-3 border-t-2 border-gray-300" />
-								<Gantt
-									tasks={tasks}
-									onClick={(e) => console.warn(e)}
-									locale={getUsersLanguage()}
-								/>
+								<Gantt tasks={tasks} locale={getUsersLanguage()} />
 							</>
 						)}
 					</>
 				)}
 			</div>
+			<Toaster />
 		</>
 	);
 };

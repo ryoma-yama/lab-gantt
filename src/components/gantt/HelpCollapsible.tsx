@@ -16,9 +16,11 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import type { Gitlab, IssueSchemaWithBasicLabels } from "@gitbeaker/rest";
 import { clsx } from "clsx";
 import { CheckCircle, CircleHelp, Copy } from "lucide-react";
 import { useRef, useState } from "react";
+import CreateIssueDialog from "./CreateIssueDialog";
 
 const parameters = [
 	{
@@ -40,6 +42,10 @@ interface ToolsProps {
 	setShowAllIssues: (value: boolean) => void;
 	showAllMilestones: boolean;
 	setShowAllMilestones: (value: boolean) => void;
+	gitlabInstance: InstanceType<typeof Gitlab>;
+	selectedProjectId: string;
+	issues: IssueSchemaWithBasicLabels[];
+	setIssues: (issues: IssueSchemaWithBasicLabels[]) => void;
 }
 
 const Tools: React.FC<ToolsProps> = ({
@@ -47,9 +53,14 @@ const Tools: React.FC<ToolsProps> = ({
 	setShowAllIssues,
 	showAllMilestones,
 	setShowAllMilestones,
+	gitlabInstance,
+	selectedProjectId,
+	issues,
+	setIssues,
 }) => {
 	const codeRef = useRef<HTMLPreElement>(null);
 	const [copied, setCopied] = useState(false);
+	const [isCreateIssueDialogOpen, setIsCreateIssueDialogOpen] = useState(false);
 
 	const handleCopy = () => {
 		if (codeRef.current) {
@@ -64,6 +75,16 @@ const Tools: React.FC<ToolsProps> = ({
 	return (
 		<Collapsible>
 			<div className="flex gap-4 mb-2">
+				<CreateIssueDialog
+					{...{
+						isCreateIssueDialogOpen,
+						setIsCreateIssueDialogOpen,
+						gitlabInstance,
+						selectedProjectId,
+						issues,
+						setIssues,
+					}}
+				/>
 				<div className="flex items-center space-x-2">
 					<Switch
 						id="status-filter"
