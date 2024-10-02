@@ -1,9 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
 	Table,
 	TableBody,
@@ -12,10 +14,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-
-import { buttonVariants } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 import type { Gitlab, IssueSchemaWithBasicLabels } from "@gitbeaker/rest";
 import { clsx } from "clsx";
 import { CheckCircle, CircleHelp, Copy } from "lucide-react";
@@ -61,6 +60,7 @@ const Tools: React.FC<ToolsProps> = ({
 	const codeRef = useRef<HTMLPreElement>(null);
 	const [copied, setCopied] = useState(false);
 	const [isCreateIssueDialogOpen, setIsCreateIssueDialogOpen] = useState(false);
+	const { toast } = useToast();
 
 	const handleCopy = () => {
 		if (codeRef.current) {
@@ -72,6 +72,11 @@ const Tools: React.FC<ToolsProps> = ({
 		}
 	};
 
+	const handleSaveDisplayPreferences = () => {
+		localStorage.setItem("SHOW_ALL_ISSUES", `${showAllIssues}`);
+		localStorage.setItem("SHOW_ALL_MILESTONES", `${showAllMilestones}`);
+		toast({ title: "Display preferences saved successfully!" });
+	};
 	return (
 		<Collapsible>
 			<div className="flex gap-4 mb-2">
@@ -101,6 +106,9 @@ const Tools: React.FC<ToolsProps> = ({
 					/>
 					<Label htmlFor="milestone-filter">Milestone: Linked / All</Label>
 				</div>
+				<Button onClick={handleSaveDisplayPreferences} size="sm">
+					Save
+				</Button>
 				<CollapsibleTrigger
 					className={clsx(
 						buttonVariants({ variant: "outline", size: "icon" }),

@@ -7,10 +7,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Gantt, type Task } from "neo-gantt-task-react";
-import "neo-gantt-task-react/style.css";
-import { useCallback, useEffect, useState } from "react";
-
 import { Toaster } from "@/components/ui/toaster";
 import {
 	type CondensedProjectSchema,
@@ -19,6 +15,9 @@ import {
 	type IssueSchemaWithBasicLabels,
 } from "@gitbeaker/rest";
 import { isValid, parseISO } from "date-fns";
+import { Gantt, type Task } from "neo-gantt-task-react";
+import "neo-gantt-task-react/style.css";
+import { useCallback, useEffect, useState } from "react";
 import GitHubLogo from "./GitHubLogo";
 import HelpCollapsible from "./components/gantt/HelpCollapsible";
 import ProfileDialog from "./components/gantt/ProfileDialog";
@@ -66,7 +65,6 @@ const parseIssues = (response: IssueSchemaWithBasicLabels): Task => {
 	}
 
 	return {
-		// start: endDate,
 		start: start || endDate,
 		end: endDate,
 		name: response.title,
@@ -103,8 +101,12 @@ const App = () => {
 	const [projects, setProjects] = useState<CondensedProjectSchema[]>([]);
 	const [issues, setIssues] = useState<IssueSchemaWithBasicLabels[]>([]);
 	const [tasks, setTasks] = useState<Task[]>([]);
-	const [showAllIssues, setShowAllIssues] = useState(false);
-	const [showAllMilestones, setShowAllMilestones] = useState(false);
+	const [showAllIssues, setShowAllIssues] = useState(
+		localStorage.getItem("SHOW_ALL_ISSUES") === "true",
+	);
+	const [showAllMilestones, setShowAllMilestones] = useState(
+		localStorage.getItem("SHOW_ALL_MILESTONES") === "true",
+	);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 	const [userProfile, setUserProfile] = useState<UserProfile | null>();
