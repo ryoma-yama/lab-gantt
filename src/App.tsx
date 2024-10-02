@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -7,7 +9,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import {
 	type CondensedProjectSchema,
 	Gitlab,
@@ -101,6 +106,9 @@ const App = () => {
 	const [projects, setProjects] = useState<CondensedProjectSchema[]>([]);
 	const [issues, setIssues] = useState<IssueSchemaWithBasicLabels[]>([]);
 	const [tasks, setTasks] = useState<Task[]>([]);
+	const [showTaskList, setShowTaskList] = useState(
+		localStorage.getItem("SHOW_TASK_LIST") === "true",
+	);
 	const [showAllIssues, setShowAllIssues] = useState(
 		localStorage.getItem("SHOW_ALL_ISSUES") === "true",
 	);
@@ -110,6 +118,7 @@ const App = () => {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 	const [userProfile, setUserProfile] = useState<UserProfile | null>();
+	const { toast } = useToast();
 
 	const initializeGitlabClient = useCallback(() => {
 		if (gitlabDomain && gitlabAccessToken) {
@@ -223,6 +232,13 @@ const App = () => {
 		return navigator.language;
 	};
 
+	const handleSaveDisplayPreferences = () => {
+		localStorage.setItem("SHOW_ALL_ISSUES", `${showAllIssues}`);
+		localStorage.setItem("SHOW_ALL_MILESTONES", `${showAllMilestones}`);
+		localStorage.setItem("SHOW_TASK_LIST", `${showTaskList}`);
+		toast({ title: "Display preferences saved successfully!" });
+	};
+
 	return (
 		<>
 			<header className="flex gap-2 p-2 mb-2 bg-zinc-100">
@@ -327,6 +343,39 @@ const App = () => {
 					<>
 						{selectedProjectId && (
 							<>
+								<div className="flex h-5 lg:h-8 items-center space-x-5 mb-3">
+									<div className="flex items-center space-x-2">
+										<Switch
+											id="show-from-to-date"
+											checked={showTaskList}
+											onCheckedChange={setShowTaskList}
+										/>
+										<Label htmlFor="show-from-to-date">Show Task list</Label>
+									</div>
+									<Separator orientation="vertical" />
+									<div className="flex items-center space-x-2">
+										<Switch
+											id="status-filter"
+											checked={showAllIssues}
+											onCheckedChange={setShowAllIssues}
+										/>
+										<Label htmlFor="status-filter">Status: Open / All</Label>
+									</div>
+									<div className="flex items-center space-x-2">
+										<Switch
+											id="milestone-filter"
+											checked={showAllMilestones}
+											onCheckedChange={setShowAllMilestones}
+										/>
+										<Label htmlFor="milestone-filter">
+											Milestone: Linked / All
+										</Label>
+									</div>
+									<Separator orientation="vertical" />
+									<Button onClick={handleSaveDisplayPreferences} size="sm">
+										Save
+									</Button>
+								</div>
 								<HelpCollapsible
 									{...{
 										showAllIssues,
@@ -336,11 +385,16 @@ const App = () => {
 										selectedProjectId,
 										issues,
 										setIssues,
+										showFromToDate: showTaskList,
 									}}
 									gitlabInstance={gitlabClient}
 								/>
-								<hr className="my-3 border-t-2 border-zinc-300" />
-								<Gantt tasks={tasks} locale={getUsersLanguage()} />
+								<Gantt
+									tasks={tasks}
+									locale={getUsersLanguage()}
+									showFromTo={true}
+									listCellWidth={showTaskList ? "155px" : ""}
+								/>
 							</>
 						)}
 					</>

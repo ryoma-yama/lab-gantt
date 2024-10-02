@@ -4,8 +4,6 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
 	Table,
 	TableBody,
@@ -14,7 +12,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
 import type { Gitlab, IssueSchemaWithBasicLabels } from "@gitbeaker/rest";
 import { clsx } from "clsx";
 import { CheckCircle, CircleHelp, Copy } from "lucide-react";
@@ -37,10 +34,6 @@ const parameters = [
 ];
 
 interface ToolsProps {
-	showAllIssues: boolean;
-	setShowAllIssues: (value: boolean) => void;
-	showAllMilestones: boolean;
-	setShowAllMilestones: (value: boolean) => void;
 	gitlabInstance: InstanceType<typeof Gitlab>;
 	selectedProjectId: string;
 	issues: IssueSchemaWithBasicLabels[];
@@ -48,10 +41,6 @@ interface ToolsProps {
 }
 
 const Tools: React.FC<ToolsProps> = ({
-	showAllIssues,
-	setShowAllIssues,
-	showAllMilestones,
-	setShowAllMilestones,
 	gitlabInstance,
 	selectedProjectId,
 	issues,
@@ -60,7 +49,6 @@ const Tools: React.FC<ToolsProps> = ({
 	const codeRef = useRef<HTMLPreElement>(null);
 	const [copied, setCopied] = useState(false);
 	const [isCreateIssueDialogOpen, setIsCreateIssueDialogOpen] = useState(false);
-	const { toast } = useToast();
 
 	const handleCopy = () => {
 		if (codeRef.current) {
@@ -72,14 +60,17 @@ const Tools: React.FC<ToolsProps> = ({
 		}
 	};
 
-	const handleSaveDisplayPreferences = () => {
-		localStorage.setItem("SHOW_ALL_ISSUES", `${showAllIssues}`);
-		localStorage.setItem("SHOW_ALL_MILESTONES", `${showAllMilestones}`);
-		toast({ title: "Display preferences saved successfully!" });
-	};
 	return (
 		<Collapsible>
 			<div className="flex gap-4 mb-2">
+				<CollapsibleTrigger
+					className={clsx(
+						buttonVariants({ variant: "outline", size: "icon" }),
+						"",
+					)}
+				>
+					<CircleHelp className="h-4 w-4" />
+				</CollapsibleTrigger>
 				<CreateIssueDialog
 					{...{
 						isCreateIssueDialogOpen,
@@ -90,33 +81,6 @@ const Tools: React.FC<ToolsProps> = ({
 						setIssues,
 					}}
 				/>
-				<div className="flex items-center space-x-2">
-					<Switch
-						id="status-filter"
-						checked={showAllIssues}
-						onCheckedChange={setShowAllIssues}
-					/>
-					<Label htmlFor="status-filter">Status: Open / All</Label>
-				</div>
-				<div className="flex items-center space-x-2">
-					<Switch
-						id="milestone-filter"
-						checked={showAllMilestones}
-						onCheckedChange={setShowAllMilestones}
-					/>
-					<Label htmlFor="milestone-filter">Milestone: Linked / All</Label>
-				</div>
-				<Button onClick={handleSaveDisplayPreferences} size="sm">
-					Save
-				</Button>
-				<CollapsibleTrigger
-					className={clsx(
-						buttonVariants({ variant: "outline", size: "icon" }),
-						"",
-					)}
-				>
-					<CircleHelp className="h-4 w-4" />
-				</CollapsibleTrigger>
 			</div>
 			<CollapsibleContent className="border p-2 rounded-md md:max-w-3xl lg:max-w-5xl">
 				<h2 className="text-xl font-bold mb-4">📝 Usage</h2>
