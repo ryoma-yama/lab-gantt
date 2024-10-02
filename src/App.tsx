@@ -225,7 +225,7 @@ const App = () => {
 
 	return (
 		<>
-			<header className="flex gap-2 p-2 mb-2 bg-gray-100">
+			<header className="flex gap-2 p-2 mb-2 bg-zinc-100">
 				<span className="text-2xl md:text-3xl flex-none mr-2">
 					🦝 <span className="md:text-2xl font-bold">LabGantt</span>
 				</span>
@@ -339,7 +339,7 @@ const App = () => {
 									}}
 									gitlabInstance={gitlabClient}
 								/>
-								<hr className="my-3 border-t-2 border-gray-300" />
+								<hr className="my-3 border-t-2 border-zinc-300" />
 								<Gantt tasks={tasks} locale={getUsersLanguage()} />
 							</>
 						)}

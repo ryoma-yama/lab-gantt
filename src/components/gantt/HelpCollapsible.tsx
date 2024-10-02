@@ -152,7 +152,7 @@ const Tools: React.FC<ToolsProps> = ({
 				<div className="relative">
 					<pre
 						ref={codeRef}
-						className="bg-gray-100 p-4 rounded overflow-x-auto"
+						className="bg-zinc-100 p-4 rounded overflow-x-auto"
 					>
 						<code>
 							---
