@@ -1,7 +1,21 @@
 {
-	"name": "gitlab-issue-gantt",
+	"name": "lab-gantt",
 	"private": true,
-	"version": "0.0.0",
+	"version": "0.1.0",
+	"description": "LabGantt visualizes GitLab issues as Gantt charts",
+	"author": "RyomaY",
+	"license": "MIT",
+	"homepage": "https://github.com/ryoma-yama/lab-gantt",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ryoma-yama/lab-gantt.git"
+	},
+	"bugs": {
+		"url": "https://github.com/ryoma-yama/lab-gantt/issues"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	},
 	"type": "module",
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
@@ -52,9 +66,7 @@
 		"vite": "^5.4.8"
 	},
 	"lint-staged": {
-		"*.{ts,tsx}": [
-			"biome check --write --no-errors-on-unmatched"
-		]
+		"*.{ts,tsx}": ["biome check --write --no-errors-on-unmatched"]
 	},
 	"packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b"
 }
