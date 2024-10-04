@@ -22,11 +22,15 @@ import {
 import { isValid, parseISO } from "date-fns";
 import { Gantt, type Task } from "neo-gantt-task-react";
 import "neo-gantt-task-react/style.css";
-import { useCallback, useEffect, useState } from "react";
+import { compareAsc, compareDesc } from "date-fns";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import GitHubLogo from "./GitHubLogo";
 import HelpCollapsible from "./components/gantt/HelpCollapsible";
 import ProfileDialog from "./components/gantt/ProfileDialog";
 import SettingsDialog from "./components/gantt/SettingsDialog";
+import SortMenuPopover, {
+	type SortField,
+} from "./components/gantt/SortMenuPopover";
 import { parseFrontMatter } from "./frontMatterParser";
 
 interface Frontmatter {
@@ -118,6 +122,10 @@ const App = () => {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 	const [userProfile, setUserProfile] = useState<UserProfile | null>();
+	const [sortFields, setSortFields] = useState<SortField[]>(
+		JSON.parse(localStorage.getItem("SORT_FIELDS") || "[]") as SortField[],
+	);
+
 	const { toast } = useToast();
 
 	const initializeGitlabClient = useCallback(() => {
@@ -236,8 +244,50 @@ const App = () => {
 		localStorage.setItem("SHOW_ALL_ISSUES", `${showAllIssues}`);
 		localStorage.setItem("SHOW_ALL_MILESTONES", `${showAllMilestones}`);
 		localStorage.setItem("SHOW_TASK_LIST", `${showTaskList}`);
+		localStorage.setItem("SORT_FIELDS", JSON.stringify(sortFields));
 		toast({ title: "Display preferences saved successfully!" });
 	};
+
+	const sortedTasks = useMemo(() => {
+		if (sortFields.length === 0) {
+			return tasks;
+		}
+
+		const sortedFields = sortFields.toSorted((a, b) => a.priority - b.priority);
+
+		return tasks.toSorted((a, b) => {
+			for (const sortField of sortedFields) {
+				const aValue = a[sortField.key as keyof Task];
+				const bValue = b[sortField.key as keyof Task];
+
+				let comparisonResult = 0;
+
+				switch (sortField.key) {
+					case "id":
+						comparisonResult =
+							sortField.direction === "asc" ? +a.id - +b.id : +b.id - +a.id;
+						break;
+
+					case "start":
+					case "end":
+						comparisonResult =
+							sortField.direction === "asc"
+								? compareAsc(aValue as Date, bValue as Date)
+								: compareDesc(aValue as Date, bValue as Date);
+						break;
+
+					default:
+						comparisonResult = 0;
+				}
+
+				if (comparisonResult !== 0) {
+					return comparisonResult;
+				}
+			}
+
+			return 0;
+		});
+	}, [tasks, sortFields]);
 
 	return (
 		<>
@@ -353,6 +403,8 @@ const App = () => {
 										<Label htmlFor="show-from-to-date">Show Task list</Label>
 									</div>
 									<Separator orientation="vertical" />
+									<SortMenuPopover {...{ sortFields, setSortFields }} />
+									<Separator orientation="vertical" />
 									<div className="flex items-center space-x-2">
 										<Switch
 											id="status-filter"
@@ -390,7 +442,7 @@ const App = () => {
 									gitlabInstance={gitlabClient}
 								/>
 								<Gantt
-									tasks={tasks}
+									tasks={sortedTasks}
 									locale={getUsersLanguage()}
 									showFromTo={true}
 									listCellWidth={showTaskList ? "155px" : ""}
