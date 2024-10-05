@@ -386,6 +386,16 @@ const App = () => {
 					<GitHubLogo />
 				</div>
 			</header>
+			{/* <Login
+				{...{
+					gitlabDomain,
+					setGitLabDomain,
+					gitlabAccessToken,
+					setGitLabAccessToken,
+				}}
+				onSettingsSaved={setGitLabClient}
+				gitlabInstance={gitlabClient}
+			/> */}
 			<div className="px-2">
 				{gitlabClient === null ? (
 					<p>Please authenticate to access GitLab data.</p>
