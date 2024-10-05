@@ -25,6 +25,7 @@ import "neo-gantt-task-react/style.css";
 import { compareAsc, compareDesc } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import GitHubLogo from "./GitHubLogo";
+import iconLabGantt from "./assets/icon-lab-gantt.svg";
 import HelpCollapsible from "./components/gantt/HelpCollapsible";
 import ProfileDialog from "./components/gantt/ProfileDialog";
 import SettingsDialog from "./components/gantt/SettingsDialog";
@@ -292,9 +293,8 @@ const App = () => {
 	return (
 		<>
 			<header className="flex gap-2 p-2 mb-2 bg-zinc-100">
-				<span className="text-2xl md:text-3xl flex-none mr-2">
-					🦝 <span className="md:text-2xl font-bold">LabGantt</span>
-				</span>
+				<img src={iconLabGantt} className="w-8 h-8" alt="GitHub Mark" />
+				<span className="md:text-2xl font-bold">LabGantt</span>
 				<div className="flex gap-2">
 					{gitlabClient === null ? (
 						<p>Please authenticate to access GitLab data.</p>
