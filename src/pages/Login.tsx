@@ -26,7 +26,7 @@ interface LoginPageProps {
 	setGitLabDomain: SetState<string>;
 	gitlabAccessToken: string;
 	setGitLabAccessToken: SetState<string>;
-	gitlabInstance: InstanceType<typeof Gitlab> | null;
+	// gitlabInstance: InstanceType<typeof Gitlab> | null;
 }
 
 const Login: React.FC<LoginPageProps> = ({
