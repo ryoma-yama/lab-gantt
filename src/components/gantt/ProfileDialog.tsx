@@ -1,4 +1,3 @@
-import type { UserProfile } from "@/App";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -9,6 +8,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import type { UserProfile } from "@/pages/Home";
 
 import { User } from "lucide-react";
 
@@ -25,6 +25,7 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
 }) => {
 	const clearLocalStorage = () => {
 		localStorage.clear();
+		setIsProfileDialogOpen(false);
 		window.location.reload();
 	};
 

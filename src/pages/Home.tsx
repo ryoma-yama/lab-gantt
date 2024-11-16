@@ -13,24 +13,24 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
-import {
-	type CondensedProjectSchema,
+import type {
+	CondensedProjectSchema,
 	Gitlab,
-	type GroupSchema,
-	type IssueSchemaWithBasicLabels,
+	GroupSchema,
+	IssueSchemaWithBasicLabels,
 } from "@gitbeaker/rest";
 import { isValid, parseISO } from "date-fns";
 import { Gantt, type Task } from "neo-gantt-task-react";
 import "neo-gantt-task-react/style.css";
+import type { GitLabClient } from "@/App";
 import HelpCollapsible from "@/components/gantt/HelpCollapsible";
 import ProfileDialog from "@/components/gantt/ProfileDialog";
-import SettingsDialog from "@/components/gantt/SettingsDialog";
 import SortMenuPopover, {
 	type SortField,
 } from "@/components/gantt/SortMenuPopover";
 import { parseFrontMatter } from "@/frontMatterParser";
 import { compareAsc, compareDesc } from "date-fns";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import GitHubLogo from "../GitHubLogo";
 import iconLabGantt from "../assets/icon-lab-gantt.svg";
 
@@ -91,26 +91,11 @@ export interface UserProfile {
 	username: string;
 	web_url: string;
 }
-type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 interface HomePageProps {
-	// onSettingsSaved: SetState<InstanceType<typeof Gitlab<false>> | null>;
-	gitlabDomain: string;
-	setGitLabDomain: SetState<string>;
-	gitlabAccessToken: string;
-	setGitLabAccessToken: SetState<string>;
-	// gitlabInstance: InstanceType<typeof Gitlab> | null;
+	gitlabClient: InstanceType<typeof Gitlab<false>>;
 }
 
-const Home: React.FC<HomePageProps> = ({
-	// onSettingsSaved: SetState<InstanceType<typeof Gitlab<false>> | null>,
-	gitlabDomain,
-	setGitLabDomain,
-	gitlabAccessToken,
-	setGitLabAccessToken,
-	// gitlabInstance: InstanceType<typeof Gitlab> | null
-}) => {
-	type GitLabClient = InstanceType<typeof Gitlab<false>>;
-	const [gitlabClient, setGitLabClient] = useState<GitLabClient | null>(null);
+const Home: React.FC<HomePageProps> = ({ gitlabClient }) => {
 	const [selectedGroupId, setSelectedGroupId] = useState(
 		localStorage.getItem("SELECTED_GROUP_ID") || "",
 	);
@@ -130,7 +115,6 @@ const Home: React.FC<HomePageProps> = ({
 	const [showAllMilestones, setShowAllMilestones] = useState(
 		localStorage.getItem("SHOW_ALL_MILESTONES") === "true",
 	);
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 	const [userProfile, setUserProfile] = useState<UserProfile | null>();
 	const [sortFields, setSortFields] = useState<SortField[]>(
@@ -139,34 +123,17 @@ const Home: React.FC<HomePageProps> = ({
 
 	const { toast } = useToast();
 
-	const initializeGitlabClient = useCallback(() => {
-		if (gitlabDomain && gitlabAccessToken) {
-			return new Gitlab({
-				host: gitlabDomain,
-				token: gitlabAccessToken,
-			});
-		}
-		return null;
-	}, [gitlabDomain, gitlabAccessToken]);
-
 	useEffect(() => {
-		const client = initializeGitlabClient();
-		if (client === null) {
-			setIsDialogOpen(true);
-			return;
-		}
-		setGitLabClient(client);
-		loadGroups(client);
+		loadGroups(gitlabClient);
 
-		// TODO: Migrate to Login page
-		loadCurrentUser(client);
+		loadCurrentUser(gitlabClient);
 
 		if (selectedGroupId === "") return;
-		loadGroupsProject(selectedGroupId, client);
+		loadGroupsProject(selectedGroupId, gitlabClient);
 
 		if (selectedProjectId === "") return;
-		loadProjectsIssues(selectedProjectId, client);
-	}, [initializeGitlabClient, selectedGroupId, selectedProjectId]);
+		loadProjectsIssues(selectedProjectId, gitlabClient);
+	}, [gitlabClient, selectedGroupId, selectedProjectId]);
 
 	const loadCurrentUser = async (client: GitLabClient) => {
 		try {
@@ -240,13 +207,6 @@ const Home: React.FC<HomePageProps> = ({
 		loadProjectsIssues(projectId, gitlabClient);
 	};
 
-	const openDialog = () => {
-		setIsDialogOpen(true);
-	};
-	const closeDialog = () => {
-		setIsDialogOpen(false);
-	};
-
 	const getUsersLanguage = () => {
 		return navigator.language;
 	};
@@ -306,69 +266,62 @@ const Home: React.FC<HomePageProps> = ({
 				<img src={iconLabGantt} className="w-8 h-8" alt="GitHub Mark" />
 				<span className="md:text-2xl font-bold">LabGantt</span>
 				<div className="flex gap-2">
-					{gitlabClient === null ? (
-						<p>Please authenticate to access GitLab data.</p>
-					) : (
-						<>
-							<Select
-								value={selectedGroupId}
-								onValueChange={(value) => handleGroupChange(value)}
-							>
-								<SelectTrigger className="w-[180px]">
-									<SelectValue placeholder="Select a group" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectGroup>
-										<SelectLabel>Select a group</SelectLabel>
-										{groups.length > 0 ? (
-											groups.map((group) => (
-												<SelectItem key={group.id} value={`${group.id}`}>
-													{group.name}
-												</SelectItem>
-											))
-										) : (
-											<SelectItem value="0" disabled>
-												No groups found
+					<>
+						<Select
+							value={selectedGroupId}
+							onValueChange={(value) => handleGroupChange(value)}
+						>
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Select a group" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									<SelectLabel>Select a group</SelectLabel>
+									{groups.length > 0 ? (
+										groups.map((group) => (
+											<SelectItem key={group.id} value={`${group.id}`}>
+												{group.name}
 											</SelectItem>
-										)}
-									</SelectGroup>
-								</SelectContent>
-							</Select>
+										))
+									) : (
+										<SelectItem value="0" disabled>
+											No groups found
+										</SelectItem>
+									)}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
 
-							{selectedGroupId && (
-								<>
-									<span className="flex items-center">/</span>
-									<Select
-										value={selectedProjectId}
-										onValueChange={(value) => handleProjectChange(value)}
-									>
-										<SelectTrigger className="w-[180px]">
-											<SelectValue placeholder="Select a project" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectGroup>
-												<SelectLabel>Select a project</SelectLabel>
-												{projects.length > 0 ? (
-													projects.map((project) => (
-														<SelectItem
-															key={project.id}
-															value={`${project.id}`}
-														>
-															{project.name}
-														</SelectItem>
-													))
-												) : (
-													<SelectItem value="0" disabled>
-														No projects found
+						{selectedGroupId && (
+							<>
+								<span className="flex items-center">/</span>
+								<Select
+									value={selectedProjectId}
+									onValueChange={(value) => handleProjectChange(value)}
+								>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue placeholder="Select a project" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectGroup>
+											<SelectLabel>Select a project</SelectLabel>
+											{projects.length > 0 ? (
+												projects.map((project) => (
+													<SelectItem key={project.id} value={`${project.id}`}>
+														{project.name}
 													</SelectItem>
-												)}
-											</SelectGroup>
-										</SelectContent>
-									</Select>
-								</>
-							)}
-						</>
-					)}
+												))
+											) : (
+												<SelectItem value="0" disabled>
+													No projects found
+												</SelectItem>
+											)}
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+							</>
+						)}
+					</>
 					{userProfile && (
 						<ProfileDialog
 							{...{
@@ -378,97 +331,68 @@ const Home: React.FC<HomePageProps> = ({
 							}}
 						/>
 					)}
-					<SettingsDialog
-						{...{
-							gitlabDomain,
-							setGitLabDomain,
-							gitlabAccessToken,
-							setGitLabAccessToken,
-						}}
-						open={isDialogOpen}
-						onOpen={openDialog}
-						onClose={closeDialog}
-						onSettingsSaved={setGitLabClient}
-						gitlabInstance={gitlabClient}
-					/>
 				</div>
 				<div className="ml-auto">
 					<GitHubLogo />
 				</div>
 			</header>
-			{/* <Login
-				{...{
-					gitlabDomain,
-					setGitLabDomain,
-					gitlabAccessToken,
-					setGitLabAccessToken,
-				}}
-				onSettingsSaved={setGitLabClient}
-				gitlabInstance={gitlabClient}
-			/> */}
 			<div className="px-2">
-				{gitlabClient === null ? (
-					<p>Please authenticate to access GitLab data.</p>
-				) : (
+				{selectedProjectId && (
 					<>
-						{selectedProjectId && (
-							<>
-								<div className="flex h-5 lg:h-8 items-center space-x-5 mb-3">
-									<div className="flex items-center space-x-2">
-										<Switch
-											id="show-from-to-date"
-											checked={showTaskList}
-											onCheckedChange={setShowTaskList}
-										/>
-										<Label htmlFor="show-from-to-date">Show Task list</Label>
-									</div>
-									<Separator orientation="vertical" />
-									<SortMenuPopover {...{ sortFields, setSortFields }} />
-									<Separator orientation="vertical" />
-									<div className="flex items-center space-x-2">
-										<Switch
-											id="status-filter"
-											checked={showAllIssues}
-											onCheckedChange={setShowAllIssues}
-										/>
-										<Label htmlFor="status-filter">Status: Open / All</Label>
-									</div>
-									<div className="flex items-center space-x-2">
-										<Switch
-											id="milestone-filter"
-											checked={showAllMilestones}
-											onCheckedChange={setShowAllMilestones}
-										/>
-										<Label htmlFor="milestone-filter">
-											Milestone: Linked / All
-										</Label>
-									</div>
-									<Separator orientation="vertical" />
-									<Button onClick={handleSaveDisplayPreferences} size="sm">
-										Save
-									</Button>
-								</div>
-								<HelpCollapsible
-									{...{
-										showAllIssues,
-										setShowAllIssues,
-										showAllMilestones,
-										setShowAllMilestones,
-										selectedProjectId,
-										issues,
-										setIssues,
-										showFromToDate: showTaskList,
-									}}
-									gitlabInstance={gitlabClient}
+						<div className="flex h-5 lg:h-8 items-center space-x-5 mb-3">
+							<div className="flex items-center space-x-2">
+								<Switch
+									id="show-from-to-date"
+									checked={showTaskList}
+									onCheckedChange={setShowTaskList}
 								/>
-								<Gantt
-									tasks={sortedTasks}
-									locale={getUsersLanguage()}
-									showFromTo={true}
-									listCellWidth={showTaskList ? "155px" : ""}
+								<Label htmlFor="show-from-to-date">Show Task list</Label>
+							</div>
+							<Separator orientation="vertical" />
+							<SortMenuPopover {...{ sortFields, setSortFields }} />
+							<Separator orientation="vertical" />
+							<div className="flex items-center space-x-2">
+								<Switch
+									id="status-filter"
+									checked={showAllIssues}
+									onCheckedChange={setShowAllIssues}
 								/>
-							</>
-						)}
+								<Label htmlFor="status-filter">Status: Open / All</Label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<Switch
+									id="milestone-filter"
+									checked={showAllMilestones}
+									onCheckedChange={setShowAllMilestones}
+								/>
+								<Label htmlFor="milestone-filter">
+									Milestone: Linked / All
+								</Label>
+							</div>
+							<Separator orientation="vertical" />
+							<Button onClick={handleSaveDisplayPreferences} size="sm">
+								Save
+							</Button>
+						</div>
+						<HelpCollapsible
+							{...{
+								showAllIssues,
+								setShowAllIssues,
+								showAllMilestones,
+								setShowAllMilestones,
+								selectedProjectId,
+								issues,
+								setIssues,
+								showFromToDate: showTaskList,
+							}}
+							gitlabInstance={gitlabClient}
+						/>
+						<Gantt
+							tasks={sortedTasks}
+							locale={getUsersLanguage()}
+							showFromTo={true}
+							listCellWidth={showTaskList ? "155px" : ""}
+						/>
 					</>
 				)}
 			</div>

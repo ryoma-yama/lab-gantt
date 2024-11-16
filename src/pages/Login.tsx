@@ -21,20 +21,19 @@ import { useEffect, useState } from "react";
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 
 interface LoginPageProps {
-	onSettingsSaved: SetState<InstanceType<typeof Gitlab<false>> | null>;
 	gitlabDomain: string;
 	setGitLabDomain: SetState<string>;
 	gitlabAccessToken: string;
 	setGitLabAccessToken: SetState<string>;
-	// gitlabInstance: InstanceType<typeof Gitlab> | null;
+	setGitLabClient: SetState<InstanceType<typeof Gitlab<false>> | null>;
 }
 
 const Login: React.FC<LoginPageProps> = ({
-	onSettingsSaved,
 	gitlabDomain,
 	setGitLabDomain,
 	gitlabAccessToken,
 	setGitLabAccessToken,
+	setGitLabClient,
 }) => {
 	const [invalid, setInvalid] = useState(true);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,12 +48,12 @@ const Login: React.FC<LoginPageProps> = ({
 		setErrorMessage(null);
 
 		try {
-			const api = new Gitlab({
+			const gitlabClient = new Gitlab({
 				host: gitlabDomain,
 				token: gitlabAccessToken,
 			});
 
-			const response = await api.Users.showCurrentUser();
+			const response = await gitlabClient.Users.showCurrentUser();
 
 			if (!response.web_url) {
 				setErrorMessage("Invalid response: web_url not found.");
@@ -64,10 +63,7 @@ const Login: React.FC<LoginPageProps> = ({
 			setSuccessMessage("✔success!");
 			localStorage.setItem("GITLAB_DOMAIN", gitlabDomain);
 			localStorage.setItem("GITLAB_ACCESS_TOKEN", gitlabAccessToken);
-			onSettingsSaved(api);
-			// setTimeout(() => {
-			// 	onClose();
-			// }, 1000);
+			setGitLabClient(gitlabClient);
 		} catch (error) {
 			setErrorMessage(
 				"Failed to retrieve user information. Please check your domain and access token.",
@@ -76,7 +72,7 @@ const Login: React.FC<LoginPageProps> = ({
 	};
 
 	return (
-		<div className="mx-auto px-2 lg:px-0 max-w-2xl">
+		<div className="mx-auto px-2 lg:px-0 max-w-2xl mt-3">
 			<h1 className="text-3xl font-bold mb-6">
 				🦝 LabGantt: GitLab Tasks in Gantt Charts
 			</h1>
@@ -131,12 +127,13 @@ const Login: React.FC<LoginPageProps> = ({
 						Please enter your GitLab domain and Personal Access Token.
 					</CardDescription>
 				</CardHeader>
-				<CardContent>
-					<form onSubmit={handleSaveSettings}>
+				<form onSubmit={handleSaveSettings}>
+					<CardContent>
 						<div className="grid grid-cols-1 gap-4 mb-4">
 							<Label htmlFor="gitlabDomain">GitLab Domain</Label>
 							<Input
 								type="text"
+								autoComplete="username"
 								id="gitlabDomain"
 								value={gitlabDomain}
 								onChange={(e) => setGitLabDomain(e.target.value)}
@@ -146,6 +143,7 @@ const Login: React.FC<LoginPageProps> = ({
 							<Label htmlFor="gitlabAccessToken">Personal Access Token</Label>
 							<Input
 								type="password"
+								autoComplete="current-password"
 								id="gitlabAccessToken"
 								value={gitlabAccessToken}
 								onChange={(e) => setGitLabAccessToken(e.target.value)}
@@ -153,19 +151,19 @@ const Login: React.FC<LoginPageProps> = ({
 								required
 							/>
 						</div>
-					</form>
-				</CardContent>
-				<CardFooter>
-					<p>
-						<span className="font-bold">Note: </span>
-						The authentication information will be stored in your browser's
-						local storage. Therefore, it is not recommended to use this on
-						public or shared devices.
-					</p>
-					<Button type="submit" disabled={invalid}>
-						Save
-					</Button>
-				</CardFooter>
+					</CardContent>
+					<CardFooter>
+						<p>
+							<span className="font-bold">Note: </span>
+							The authentication information will be stored in your browser's
+							local storage. Therefore, it is not recommended to use this on
+							public or shared devices.
+						</p>
+						<Button type="submit" disabled={invalid}>
+							Save
+						</Button>
+					</CardFooter>
+				</form>
 				<div className="h-6 mb-6">
 					{errorMessage && <div className="text-red-600">{errorMessage}</div>}
 					{successMessage && (
