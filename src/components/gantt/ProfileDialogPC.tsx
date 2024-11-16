@@ -18,7 +18,7 @@ interface ProfileDialogProps {
 	setIsProfileDialogOpen: (value: boolean) => void;
 }
 
-const ProfileDialog: React.FC<ProfileDialogProps> = ({
+const ProfileDialogPC: React.FC<ProfileDialogProps> = ({
 	userProfile: { username, web_url },
 	isProfileDialogOpen,
 	setIsProfileDialogOpen,
@@ -68,4 +68,4 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
 	);
 };
 
-export default ProfileDialog;
+export default ProfileDialogPC;

@@ -19,16 +19,15 @@ import {
 	type GroupSchema,
 	type IssueSchemaWithBasicLabels,
 } from "@gitbeaker/rest";
-import { isValid, parseISO } from "date-fns";
+import { compareAsc, compareDesc, isValid, parseISO } from "date-fns";
 import { Gantt, type Task } from "neo-gantt-task-react";
 import "neo-gantt-task-react/style.css";
-import { compareAsc, compareDesc } from "date-fns";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import GitHubLogo from "./GitHubLogo";
 import iconLabGantt from "./assets/icon-lab-gantt.svg";
+import HeaderMobile from "./components/gantt/HeaderMobile";
+import HeaderPC from "./components/gantt/HeaderPC";
 import HelpCollapsible from "./components/gantt/HelpCollapsible";
-import ProfileDialog from "./components/gantt/ProfileDialog";
-import SettingsDialog from "./components/gantt/SettingsDialog";
 import SortMenuPopover, {
 	type SortField,
 } from "./components/gantt/SortMenuPopover";
@@ -294,7 +293,7 @@ const App = () => {
 		<>
 			<header className="flex gap-2 p-2 mb-2 bg-zinc-100">
 				<img src={iconLabGantt} className="w-8 h-8" alt="GitHub Mark" />
-				<span className="md:text-2xl font-bold">LabGantt</span>
+				<span className="md:text-2xl font-bold hidden sm:inline">LabGantt</span>
 				<div className="flex gap-2">
 					{gitlabClient === null ? (
 						<p>Please authenticate to access GitLab data.</p>
@@ -360,7 +359,7 @@ const App = () => {
 						</>
 					)}
 					{userProfile && (
-						<ProfileDialog
+						<HeaderPC
 							{...{
 								userProfile,
 								isProfileDialogOpen,
@@ -368,22 +367,20 @@ const App = () => {
 							}}
 						/>
 					)}
-					<SettingsDialog
-						{...{
-							gitlabDomain,
-							setGitLabDomain,
-							gitlabAccessToken,
-							setGitLabAccessToken,
-						}}
-						open={isDialogOpen}
-						onOpen={openDialog}
-						onClose={closeDialog}
-						onSettingsSaved={setGitLabClient}
-						gitlabInstance={gitlabClient}
-					/>
 				</div>
-				<div className="ml-auto">
+				<div className="ml-auto hidden sm:inline">
 					<GitHubLogo />
+				</div>
+				<div className="ml-auto sm:hidden flex items-center">
+					{userProfile && (
+						<HeaderMobile
+							{...{
+								userProfile,
+								isProfileDialogOpen,
+								setIsProfileDialogOpen,
+							}}
+						/>
+					)}
 				</div>
 			</header>
 			<div className="px-2">
