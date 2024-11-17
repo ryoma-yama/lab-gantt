@@ -1,4 +1,3 @@
-import type { UserProfile } from "@/App";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -9,6 +8,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import type { UserProfile } from "@/pages/Home";
 
 import { User } from "lucide-react";
 
@@ -36,7 +36,7 @@ const ProfileDialogMobile: React.FC<ProfileDialogProps> = ({
 						<div className="mr-2">
 							<User className="h-4 w-4" />
 						</div>
-						<p>PROFILE</p>
+						<p>Profile</p>
 					</div>
 				</Button>
 			</DialogTrigger>

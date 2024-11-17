@@ -1,4 +1,3 @@
-import type { UserProfile } from "@/App";
 import { buttonVariants } from "@/components/ui/button";
 import {
 	Sheet,
@@ -8,6 +7,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import type { UserProfile } from "@/pages/Home";
 import { Menu } from "lucide-react";
 import "neo-gantt-task-react/style.css";
 import githubMark from "../../assets/github-mark.svg";
@@ -31,18 +31,16 @@ const SettingSheet: React.FC<SettingSheetProps> = ({
 			</SheetTrigger>
 			<SheetContent>
 				<SheetHeader>
-					<SheetTitle>MENU</SheetTitle>
+					<SheetTitle>Menu</SheetTitle>
 				</SheetHeader>
 				<div className="mt-2 mb-2">
-					{userProfile && (
-						<ProfileDialogMobile
-							{...{
-								userProfile,
-								isProfileDialogOpen,
-								setIsProfileDialogOpen,
-							}}
-						/>
-					)}
+					<ProfileDialogMobile
+						{...{
+							userProfile,
+							isProfileDialogOpen,
+							setIsProfileDialogOpen,
+						}}
+					/>
 				</div>
 				<div className={cn(buttonVariants({ variant: "outline" }), "w-full")}>
 					<a
@@ -57,7 +55,7 @@ const SettingSheet: React.FC<SettingSheetProps> = ({
 								className="w-4 h-4 sm:w-8 sm:h-8 mr-2"
 								alt="GitHub Mark"
 							/>
-							<span>GITHUB</span>
+							<span>GitHub</span>
 						</div>
 					</a>
 				</div>

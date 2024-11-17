@@ -1,4 +1,4 @@
-import type { UserProfile } from "@/App";
+import type { UserProfile } from "@/pages/Home";
 import "neo-gantt-task-react/style.css";
 import ProfileDialogPC from "./ProfileDialogPC";
 

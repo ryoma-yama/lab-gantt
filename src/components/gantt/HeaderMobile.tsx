@@ -1,4 +1,4 @@
-import type { UserProfile } from "@/App";
+import type { UserProfile } from "@/pages/Home";
 import SettingSheet from "./SettingSheet";
 
 interface HeaderPCProps {
@@ -14,15 +14,13 @@ const HeaderPC: React.FC<HeaderPCProps> = ({
 }) => {
 	return (
 		<>
-			{userProfile && (
-				<SettingSheet
-					{...{
-						userProfile,
-						isProfileDialogOpen,
-						setIsProfileDialogOpen,
-					}}
-				/>
-			)}
+			<SettingSheet
+				{...{
+					userProfile,
+					isProfileDialogOpen,
+					setIsProfileDialogOpen,
+				}}
+			/>
 		</>
 	);
 };

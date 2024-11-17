@@ -23,8 +23,9 @@ import { isValid, parseISO } from "date-fns";
 import { Gantt, type Task } from "neo-gantt-task-react";
 import "neo-gantt-task-react/style.css";
 import type { GitLabClient } from "@/App";
+import HeaderMobile from "@/components/gantt/HeaderMobile";
+import HeaderPC from "@/components/gantt/HeaderPC";
 import HelpCollapsible from "@/components/gantt/HelpCollapsible";
-import ProfileDialog from "@/components/gantt/ProfileDialog";
 import SortMenuPopover, {
 	type SortField,
 } from "@/components/gantt/SortMenuPopover";
@@ -264,7 +265,7 @@ const Home: React.FC<HomePageProps> = ({ gitlabClient }) => {
 		<>
 			<header className="flex gap-2 p-2 mb-2 bg-zinc-100">
 				<img src={iconLabGantt} className="w-8 h-8" alt="GitHub Mark" />
-				<span className="md:text-2xl font-bold">LabGantt</span>
+				<span className="hidden font-bold sm:inline sm:text-2xl">LabGantt</span>
 				<div className="flex gap-2">
 					<>
 						<Select
@@ -323,7 +324,7 @@ const Home: React.FC<HomePageProps> = ({ gitlabClient }) => {
 						)}
 					</>
 					{userProfile && (
-						<ProfileDialog
+						<HeaderPC
 							{...{
 								userProfile,
 								isProfileDialogOpen,
@@ -332,8 +333,19 @@ const Home: React.FC<HomePageProps> = ({ gitlabClient }) => {
 						/>
 					)}
 				</div>
-				<div className="ml-auto">
+				<div className="ml-auto hidden sm:inline">
 					<GitHubLogo />
+				</div>
+				<div className="ml-auto flex items-center sm:hidden">
+					{userProfile && (
+						<HeaderMobile
+							{...{
+								userProfile,
+								isProfileDialogOpen,
+								setIsProfileDialogOpen,
+							}}
+						/>
+					)}
 				</div>
 			</header>
 			<div className="px-2">
