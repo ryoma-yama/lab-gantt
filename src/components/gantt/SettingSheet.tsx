@@ -52,7 +52,7 @@ const SettingSheet: React.FC<SettingSheetProps> = ({
 						<div className="flex justify-center">
 							<img
 								src={githubMark}
-								className="w-4 h-4 sm:w-8 sm:h-8 mr-2"
+								className="w-4 h-4 mr-2"
 								alt="GitHub Mark"
 							/>
 							<span>GitHub</span>
