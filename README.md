@@ -1,39 +1,4 @@
-# 🦝 LabGantt: GitLab Tasks in Gantt Charts
-
-LabGantt visualizes GitLab issues as Gantt charts. Supports both free and self-hosted GitLab instances.
-
-## 💻 Try It Now!
-
-👉 **[Access LabGantt here](https://ryoma-yama.github.io/lab-gantt/)** 👈
-
-Powered by [neo-gantt-task-react](https://github.com/ryoma-yama/neo-gantt-task-react) 🌐
-
-## 🎯 Intended Users
-
-LabGantt is ideal for:
-
-- **GitLab free account users** who want to visualize tasks as Gantt charts but don’t have access to premium features like built-in Gantt charts.
-
-If you are using GitLab's **Premium** or **Ultimate** plans, you can use the built-in Roadmap feature for similar functionality.
-
-## 💡 For GitHub Users
-
-If you're using **GitHub**, consider using **GitHub Projects** with Roadmaps, which offers similar functionality for task management.
-
-## ✨ Features
-
-- 📊 Displays GitLab issues as Gantt charts.
-- 🛠️ Works with free and self-hosted GitLab.
-- 🧑‍💻 Simple interface for tracking project timelines.
-
-## 🔍 How It Works
-
-1. 🔗 Connects to your GitLab account via the GitLab API.
-2. 📅 Retrieves your project issues and shows them as Gantt charts.
-3. 📈 Lets you manage and track progress in one view.
-
-
-<h1 align="center">Welcome to lab-gantt 👋</h1>
+<h1 align="center">Welcome to LabGantt 👋</h1>
 <p>
   <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-blue.svg?cacheSeconds=2592000" />
   <img src="https://img.shields.io/badge/node-%3E%3D20.0.0-blue.svg" />
@@ -49,8 +14,6 @@ If you're using **GitHub**, consider using **GitHub Projects** with Roadmaps, wh
 </p>
 
 > LabGantt visualizes GitLab issues as Gantt charts
-
-### 🏠 [Homepage](https://github.com/ryoma-yama/lab-gantt)
 
 ### ✨ [Live Demo](https://ryoma-yama.github.io/lab-gantt/)
 
