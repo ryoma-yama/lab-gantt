@@ -18,22 +18,26 @@ interface ProfileDialogProps {
 	setIsProfileDialogOpen: (value: boolean) => void;
 }
 
-const ProfileDialog: React.FC<ProfileDialogProps> = ({
+const ProfileDialogMobile: React.FC<ProfileDialogProps> = ({
 	userProfile: { username, web_url },
 	isProfileDialogOpen,
 	setIsProfileDialogOpen,
 }) => {
 	const clearLocalStorage = () => {
 		localStorage.clear();
-		setIsProfileDialogOpen(false);
 		window.location.reload();
 	};
 
 	return (
 		<Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
 			<DialogTrigger asChild>
-				<Button variant="outline" size="icon">
-					<User className="h-4 w-4" />
+				<Button variant="outline" className="w-full">
+					<div className="flex items-center">
+						<div className="mr-2">
+							<User className="h-4 w-4" />
+						</div>
+						<p>Profile</p>
+					</div>
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
@@ -69,4 +73,4 @@ const ProfileDialog: React.FC<ProfileDialogProps> = ({
 	);
 };
 
-export default ProfileDialog;
+export default ProfileDialogMobile;
